@@ -6,7 +6,7 @@ After bootstrap, you (and the dev team) can edit this file freely to add project
 
 **Kit version:** agent-kit v1.1 (mirrored to claude-kit v1.2) · **Last updated:** 2026-08-18
 
-Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in one place: `/Users/mac/Projects/.ai/README.md`. Do not read a version from anywhere else.
+Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in one place: the kit repo's root `README.md`. Do not read a version from anywhere else.
 
 ---
 

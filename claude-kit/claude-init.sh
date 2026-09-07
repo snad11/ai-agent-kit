@@ -89,14 +89,14 @@ ${BOLD}What it does NOT do:${NC}
     - Run audits (Claude conversational step)
 
 ${BOLD}Examples:${NC}
-    bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh
-    bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh .
-    bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh /path/to/other/project
+    bash $KIT_DIR/claude-init.sh
+    bash $KIT_DIR/claude-init.sh .
+    bash $KIT_DIR/claude-init.sh /path/to/other/project
 
 ${BOLD}After running this script:${NC}
     1. The target has .claude/ populated and rules.md built
     2. Open Claude Code in the target directory
-    3. Reference @/Users/mac/Projects/.ai/claude-kit/BOOTSTRAP.md to continue with
+    3. Reference @$KIT_DIR/BOOTSTRAP.md to continue with
        conversational phases (discovery, context gathering, audits, CLAUDE.md,
        memory, hooks, workflows)
 EOF
@@ -189,7 +189,7 @@ printf "  Detected: %s\n\n" "${STACKS:-none (universal baseline only)}"
 # Compute memory key
 # ============================================================
 
-# Convert /Users/mac/Projects/myapp → -Users-mac-Projects-myapp
+# Convert /Users/you/Projects/myapp → -Users-you-Projects-myapp
 MEMORY_KEY=$(echo "$TARGET" | sed 's|/|-|g')
 MEMORY_ROOT="$HOME/.claude/projects/${MEMORY_KEY}/memory"
 
@@ -324,7 +324,7 @@ ${BOLD}Next steps:${NC}
 
   ${BOLD}1. Continue the bootstrap with Claude Code (conversational):${NC}
      Open Claude Code in ${TARGET} and reference:
-     ${BLUE}@/Users/mac/Projects/.ai/claude-kit/BOOTSTRAP.md${NC}
+     ${BLUE}@$KIT_DIR/BOOTSTRAP.md${NC}
 
      This will:
      - Ask you about the project scope / context

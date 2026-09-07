@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # claude-sync.sh — propagate kit updates into an already-bootstrapped project
 #
-# Usage:  bash /Users/mac/Projects/.ai/claude-kit/claude-sync.sh <project-path>
+# Usage:  bash $KIT/claude-kit/claude-sync.sh <project-path>
 #
 # What it does:
 #   1. Overwrites <project>/.claude/skills/*/SKILL.md with the kit's latest

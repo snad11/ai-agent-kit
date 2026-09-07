@@ -40,13 +40,15 @@ The **memory-into-anchor clone** is the core generalization: Claude auto-loads i
 
 ### Quick start (mechanical install + conversational finish)
 
+> `$KIT` is your clone of this repo — e.g. `export KIT=~/ai-agent-kit`. See the [root README](../README.md#install).
+
 ```bash
 # 1. Mechanical: detect stack, emit dirs, build rules, generate AGENTS.md, clone memory, install plan-hook
-bash /Users/mac/Projects/.ai/agent-kit/agent-init.sh . --target all
+bash $KIT/agent-kit/agent-init.sh . --target all
 
 # 2. Conversational: context Q&A, audits, author memory, (for claude/all) generate CLAUDE.md
 #    In your agent, reference:
-@/Users/mac/Projects/.ai/agent-kit/BOOTSTRAP.md
+@$KIT/agent-kit/BOOTSTRAP.md
 ```
 
 ### Standalone scripts
@@ -92,4 +94,4 @@ Commit or push anything, modify source code, run tests, install dependencies, co
 
 ---
 
-**Version:** 1.0 · **Updated:** 2026-07-25 · Generalized from `claude-kit` v1.1
+**Version:** 1.1 — pinned in the [root README](../README.md#versions) · **Updated:** 2026-08-18 · Generalized from `claude-kit`

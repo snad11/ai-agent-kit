@@ -6,14 +6,16 @@
 
 In any project (whether it's an existing codebase or a fresh empty folder), open Claude Code and reference this file. Three ways:
 
+> `$KIT` is your clone of this repo — e.g. `export KIT=~/ai-agent-kit`. See the [root README](../README.md#install).
+
 ```
-@/Users/mac/Projects/.ai/claude-kit/BOOTSTRAP.md please bootstrap this project
+@$KIT/claude-kit/BOOTSTRAP.md please bootstrap this project
 ```
 
 or
 
 ```
-@/Users/mac/Projects/.ai/claude-kit/BOOTSTRAP.md
+@$KIT/claude-kit/BOOTSTRAP.md
 ```
 
 (then ask Claude to follow the instructions)
@@ -21,7 +23,7 @@ or
 or run the helper script directly:
 
 ```
-bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh
+bash $KIT/claude-kit/claude-init.sh
 ```
 
 The bootstrap is **conversational** — Claude will ask questions, you answer, and at the end the project has the full system installed.
@@ -91,7 +93,7 @@ Capture answers as you go. You'll save them to memory in Phase 5.
 
 ### Phase 3 — Run the audit
 
-For each detected repo, launch a `general-purpose` agent (in the background, in parallel if there are multiple repos) using the audit prompt template at `/Users/mac/Projects/.ai/claude-kit/templates/audit-prompt.md`.
+For each detected repo, launch a `general-purpose` agent (in the background, in parallel if there are multiple repos) using the audit prompt template at `$KIT/claude-kit/templates/audit-prompt.md`.
 
 Steps:
 
@@ -109,7 +111,7 @@ This phase happens while audits are running.
 Use the helper script:
 
 ```bash
-bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh <project-root>
+bash $KIT/claude-kit/claude-init.sh <project-root>
 ```
 
 OR do it manually if the script isn't available:
@@ -267,7 +269,7 @@ Once bootstrap is complete, the user manages the system project-by-project:
 
 ### Updating the kit itself (affects future bootstraps)
 
-If the user discovers a rule that should be universal (apply to all future projects), they edit `/Users/mac/Projects/.ai/claude-kit/rules/rules-baseline.md` or the appropriate stack module. The next project bootstrapped will get the updated rules. Existing projects need to re-run the bootstrap (or manually copy the new rules into their `.claude/rules.md`).
+If the user discovers a rule that should be universal (apply to all future projects), they edit `$KIT/claude-kit/rules/rules-baseline.md` or the appropriate stack module. The next project bootstrapped will get the updated rules. Existing projects need to re-run the bootstrap (or manually copy the new rules into their `.claude/rules.md`).
 
 ---
 

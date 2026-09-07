@@ -1,6 +1,6 @@
 # Claude Kit — Portable AI development system
 
-**Version:** 1.0
+**Version:** 1.2 — pinned in the [root README](../README.md#versions)
 **Author:** Solomon Darku (Snad)
 **Built:** 2026-04-09 → 2026-04-10
 **Origin:** Extracted from the XLent Choice project's Claude Code setup
@@ -30,10 +30,12 @@ Originally built for the XLent Choice project (NestJS + Next.js + Flutter), now 
 
 ### Option A: Fully conversational (recommended)
 
+> `$KIT` is your clone of this repo — e.g. `export KIT=~/ai-agent-kit`. See the [root README](../README.md#install).
+
 ```
 cd /path/to/your/project
 # Open Claude Code, then type:
-@/Users/mac/Projects/.ai/claude-kit/BOOTSTRAP.md please bootstrap this project
+@$KIT/claude-kit/BOOTSTRAP.md please bootstrap this project
 ```
 
 Claude will:
@@ -49,7 +51,7 @@ Claude will:
 ### Option B: Script first, Claude second
 
 ```
-bash /Users/mac/Projects/.ai/claude-kit/claude-init.sh /path/to/your/project
+bash $KIT/claude-kit/claude-init.sh /path/to/your/project
 ```
 
 This does the mechanical file copies instantly. Then open Claude Code in the project and reference `@BOOTSTRAP.md` to finish the conversational steps (audits, CLAUDE.md, memory).
@@ -88,7 +90,7 @@ This does the mechanical file copies instantly. Then open Claude Code in the pro
 ## Folder layout
 
 ```
-/Users/mac/Projects/.ai/
+$KIT/
 ├── PROMPT_GENERATOR.md              ← The original prompt generator (pre-existing)
 └── claude-kit/
     ├── README.md                    ← You are here

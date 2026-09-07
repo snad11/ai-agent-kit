@@ -149,8 +149,8 @@ The user (and Claude during sessions) should add memory files as new context eme
 
 Each project gets its own memory folder, named after the project's path with slashes replaced by dashes:
 
-- Project at `/Users/mac/Projects/myapp` → memory at `~/.claude/projects/-Users-mac-Projects-myapp/memory/`
-- Project at `/Users/mac/Projects/client/website` → memory at `~/.claude/projects/-Users-mac-Projects-client-website/memory/`
+- Project at `/Users/you/Projects/myapp` → memory at `~/.claude/projects/-Users-you-Projects-myapp/memory/`
+- Project at `/Users/you/Projects/client/website` → memory at `~/.claude/projects/-Users-you-Projects-client-website/memory/`
 
 The bootstrap process auto-detects the path and creates the memory folder.
 
