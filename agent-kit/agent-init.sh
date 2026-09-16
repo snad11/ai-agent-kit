@@ -264,6 +264,10 @@ build_rules_to() {
         done <<< "$STACKS"
     fi
     [ -n "$backup" ] && printf '  %sbacked up prior rules to %s%s\n' "$BLUE" "$backup" "$NC"
+    # Explicit success: on a fresh install $backup is empty, so the test above
+    # returns 1 and, as the last statement, would become the function's exit
+    # status — aborting the script under `set -e` before AGENTS.md is written.
+    return 0
 }
 build_rules_to "$RULES_AGENTS"
 
@@ -342,16 +346,21 @@ ensure_gitignore
 RULES_COUNT="$(grep -c '^### ' "$RULES_AGENTS")"
 SKILLS_COUNT="$(find "$TARGET/.agents/skills" -name 'SKILL.md' | wc -l | tr -d ' ')"
 
+# Build the per-target line(s) BEFORE the heredoc. A $(case ...) inlined into a
+# heredoc breaks: bash ends the command substitution at the first unbalanced ')',
+# which is the case pattern itself (`zcode)`), and dumps raw source into the banner.
+DIRS_BLOCK="$(printf '  %s/.agents/   (universal home: skills, scripts, rules.md, workflows, templates)' "$TARGET")"
+case "$AGENT_TARGET" in
+    zcode)  DIRS_BLOCK="$(printf '%s\n  %s/.zcode/   (symlinked skills, scripts, config.json)' "$DIRS_BLOCK" "$TARGET")" ;;
+    claude) DIRS_BLOCK="$(printf '%s\n  %s/.claude/  (real copies)' "$DIRS_BLOCK" "$TARGET")" ;;
+    all)    DIRS_BLOCK="$(printf '%s\n  %s/.zcode/   (symlinked skills, scripts, config.json)\n  %s/.claude/  (real copies)' "$DIRS_BLOCK" "$TARGET" "$TARGET")" ;;
+esac
+
 cat <<EOF
 ${GREEN}${BOLD}OK agent-init complete${NC}
 
 ${BOLD}Installed at:${NC}
-  ${TARGET}/.agents/   (universal home: skills, scripts, rules.md, workflows, templates)
-$(case "$AGENT_TARGET" in
-    zcode) printf '  %s/.zcode/   (symlinked skills, scripts, config.json)\n' "$TARGET" ;;
-    claude) printf '  %s/.claude/  (real copies)\n' "$TARGET" ;;
-    all) printf '  %s/.zcode/   (symlinked skills, scripts, config.json)\n  %s/.claude/  (real copies)\n' "$TARGET" "$TARGET" ;;
-esac)
+${DIRS_BLOCK}
   ${TARGET}/AGENTS.md   (anchor + memory clone)
 
 ${BOLD}Summary:${NC}
