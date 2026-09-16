@@ -39,9 +39,9 @@ For any non-trivial task (anything beyond a typo/rename):
 
 ---
 
-## Slash commands available (skills)
+## Skills
 
-The skills install to `{{SKILLS_DIR}}/` (and, where the target supports it, additional tool dirs). Same names and behavior across agents:
+{{SKILLS_INTRO}}
 
 | Skill | Purpose |
 |---|---|

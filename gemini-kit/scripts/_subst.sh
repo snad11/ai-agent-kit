@@ -22,6 +22,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|GEMINI.md|g" \
         -e "s|{{RULES_PATH}}|.gemini/rules.md|g" \
         -e "s|{{SKILLS_DIR}}|.gemini/commands|g" \
+        -e "s|{{SKILLS_INTRO}}|The skills install to .gemini/commands/ as toml commands. Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|.gemini/templates|g" \
         "$src" > "$dst"
 }

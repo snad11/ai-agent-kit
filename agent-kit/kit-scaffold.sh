@@ -194,8 +194,15 @@ PY
     # Each kit needs its own _subst.sh: the path tokens differ per agent, and
     # kit-sync.sh treats _subst.sh as kit-owned so it is never mirrored.
     mkdir -p "$outdir/scripts"
-    local skills_dir="$cmddir"
-    [ "$skills_dir" = "-" ] && skills_dir="$basedir/skills"
+    local skills_dir="$cmddir" skills_intro
+    if [ "$cmdfmt" = "none" ]; then
+        skills_dir="$basedir/skills"
+        skills_intro="This agent has no slash-command format, so the skills below are workflows to follow manually rather than invokable commands. Same names and behavior across agents:"
+    else
+        # No backticks: this string is interpolated into a double-quoted sed
+        # expression, where a backtick would be command substitution.
+        skills_intro="The skills install to $cmddir/ as $cmdfmt commands. Same names and behavior across agents:"
+    fi
     cat > "$outdir/scripts/_subst.sh" <<SUBST
 #!/usr/bin/env bash
 # Template substitution for ${prefix}-init.sh.
@@ -221,11 +228,137 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|${anchor}|g" \\
         -e "s|{{RULES_PATH}}|${rules}|g" \\
         -e "s|{{SKILLS_DIR}}|${skills_dir}|g" \\
+        -e "s|{{SKILLS_INTRO}}|${skills_intro}|g" \\
         -e "s|{{TEMPLATES_DIR}}|${basedir}/templates|g" \\
         "\$src" > "\$dst"
 }
 SUBST
     bash -n "$outdir/scripts/_subst.sh"
+
+    # README.md and BOOTSTRAP.md are generated once and then hand-editable:
+    # regenerating never clobbers prose someone has since written.
+    if [ ! -f "$ROOT/$kit/README.md" ] || [ "$CHECK" -eq 1 ]; then
+        local cmdline="This agent has no slash-command format. The seven skills ship as documented workflows inside \`$anchor\`, not as invokable commands."
+        if [ "$cmdfmt" != "none" ]; then
+            cmdline="The seven skills are installed as \`$cmdfmt\` commands in \`$cmddir/\`: \`/x-implement\`, \`/x-check\`, \`/x-rules\`, \`/x-prompt\`, \`/x-check-file\`, \`/x-add-rule\`, \`/x-audit\`."
+        fi
+        cat > "$outdir/README.md" <<README
+# ${label} kit
+
+Installs the shared **skills + rules + memory + hooks** system into any project,
+in the layout ${label} actually reads.
+
+> \`\$KIT\` is your clone of this repo — e.g. \`export KIT=~/ai-agent-kit\`.
+> See the [root README](../README.md#install).
+
+## Quick start
+
+\`\`\`bash
+cd /path/to/your/project
+bash \$KIT/$kit/${prefix}-init.sh .
+\`\`\`
+
+Then finish the conversational phases by referencing \`@\$KIT/$kit/BOOTSTRAP.md\`
+in ${label}.
+
+## What it writes
+
+| Path | What it is |
+|---|---|
+| \`$anchor\` | The file ${label} reads automatically. Rules index + memory clone. |
+| \`$rules\` | Universal rule baseline plus auto-detected stack modules. |
+| \`$basedir/scripts/\` | Pre-commit scanner, hook + workflow installers, memory cloner. |
+| \`$basedir/workflows/x-check.yml\` | GitHub Actions check, staged into \`.github/\` by \`install-hooks.sh\`. |
+
+## Commands
+
+$cmdline
+
+## Caveat
+
+$note
+
+## Keeping in step
+
+This kit's shared assets are mirrored from \`agent-kit\`, and \`${prefix}-init.sh\`
+is generated. Do not hand-edit either:
+
+\`\`\`bash
+bash \$KIT/agent-kit/kit-scaffold.sh   # regenerate installers
+bash \$KIT/agent-kit/kit-sync.sh       # mirror rules/skills/scripts
+bash \$KIT/agent-kit/kit-sync.sh --check   # CI gate
+\`\`\`
+README
+        cat > "$outdir/BOOTSTRAP.md" <<BOOTSTRAP
+# BOOTSTRAP — set up a project with the ${label} kit
+
+Reference this file in ${label} from the project you want to bootstrap:
+
+\`\`\`
+@\$KIT/$kit/BOOTSTRAP.md please bootstrap this project
+\`\`\`
+
+Or run the mechanical installer first, then return here for the
+conversational phases:
+
+\`\`\`bash
+bash \$KIT/$kit/${prefix}-init.sh .
+\`\`\`
+
+---
+
+## Instructions for the agent (read this entire file first)
+
+You are bootstrapping a project with the ${label} kit. Multi-phase. Do not skip
+phases. Do not answer questions on the user's behalf. Be senior-engineer-level
+deliberate.
+
+### Phase 0 — Confirm
+Run \`pwd\`. State what you are about to do and ask the user to confirm the
+working directory. **Wait for explicit confirmation before any file operation.**
+
+### Phase 1 — Discover
+\`ls -la\`. Detect the stack(s) actually present — do not assume, and ask if
+unsure. Identify every repo in the workspace.
+
+### Phase 2 — Context
+Ask the user the project-context questions **one at a time**: what the project
+is, who uses it, what is in flight, what must never break, deploy targets,
+third-party services.
+
+### Phase 3 — Audit
+For each detected repo, run the audit in \`$basedir/templates/audit-prompt.md\`
+over every source file, line by line. Use background agents where the tool
+supports them. Write findings under \`audits/\`.
+
+### Phase 4 — Rules
+Review \`$rules\`. Append project-specific rules discovered in Phase 3, using
+the existing ID scheme and the Why/Detect/Fix template.
+
+### Phase 5 — Memory
+Author the project memory files, then re-run the memory clone so \`$anchor\`
+carries them verbatim:
+
+\`\`\`bash
+bash $basedir/scripts/clone-memory.sh $anchor <memory-dir>
+\`\`\`
+
+### Phase 6 — Hooks and CI
+\`\`\`bash
+bash $basedir/scripts/install-hooks.sh all
+bash $basedir/scripts/install-workflows.sh all
+\`\`\`
+
+---
+
+## Constraints
+
+- **Do not commit anything.**
+- **Do not modify source code.** Only \`$basedir/\`, \`$anchor\`, \`audits/\`
+  and the memory folder.
+- $note
+BOOTSTRAP
+    fi
 
     chmod +x "$outdir/${prefix}-init.sh"
     bash -n "$outdir/${prefix}-init.sh"

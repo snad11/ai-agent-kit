@@ -22,6 +22,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|.github/copilot-instructions.md|g" \
         -e "s|{{RULES_PATH}}|.github/copilot-instructions.md|g" \
         -e "s|{{SKILLS_DIR}}|.github/instructions|g" \
+        -e "s|{{SKILLS_INTRO}}|The skills install to .github/instructions/ as instructions commands. Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|.github/templates|g" \
         "$src" > "$dst"
 }

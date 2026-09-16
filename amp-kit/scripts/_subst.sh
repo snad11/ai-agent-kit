@@ -22,6 +22,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|AGENTS.md|g" \
         -e "s|{{RULES_PATH}}|.agents/rules.md|g" \
         -e "s|{{SKILLS_DIR}}|.agents/skills|g" \
+        -e "s|{{SKILLS_INTRO}}|This agent has no slash-command format, so the skills below are workflows to follow manually rather than invokable commands. Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|.agents/templates|g" \
         "$src" > "$dst"
 }

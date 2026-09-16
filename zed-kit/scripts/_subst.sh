@@ -22,6 +22,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|.rules|g" \
         -e "s|{{RULES_PATH}}|.zed/rules.md|g" \
         -e "s|{{SKILLS_DIR}}|.zed/skills|g" \
+        -e "s|{{SKILLS_INTRO}}|This agent has no slash-command format, so the skills below are workflows to follow manually rather than invokable commands. Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|.zed/templates|g" \
         "$src" > "$dst"
 }

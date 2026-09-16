@@ -22,6 +22,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|AGENTS.md|g" \
         -e "s|{{RULES_PATH}}|.cursor/rules/000-project-rules.mdc|g" \
         -e "s|{{SKILLS_DIR}}|.cursor/commands|g" \
+        -e "s|{{SKILLS_INTRO}}|The skills install to .cursor/commands/ as mdc commands. Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|.cursor/templates|g" \
         "$src" > "$dst"
 }

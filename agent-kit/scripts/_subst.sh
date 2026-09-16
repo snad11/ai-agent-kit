@@ -54,6 +54,7 @@ subst_copy() {
         -e "s|{{ANCHOR_FILE}}|AGENTS.md|g" \
         -e "s|{{RULES_PATH}}|${rules_path}|g" \
         -e "s|{{SKILLS_DIR}}|${skills_dir}|g" \
+        -e "s|{{SKILLS_INTRO}}|The skills install to ${skills_dir}/ (and, where the target supports it, additional tool dirs). Same names and behavior across agents:|g" \
         -e "s|{{TEMPLATES_DIR}}|${templates_dir}|g" \
         "$src" > "$dst"
 }
