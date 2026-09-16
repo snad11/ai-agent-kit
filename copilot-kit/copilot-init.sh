@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# copilot-init.sh — install the GitHub Copilot kit into a target project.
+#
+# GENERATED FILE — do not edit by hand.
+# Source: agent-kit/templates/kit-init.sh.template + agent-kit/kits.manifest
+# Regenerate: bash agent-kit/kit-scaffold.sh
+#
+# Usage:
+#     bash copilot-init.sh [target-project-path]
+#     bash copilot-init.sh .
+#
+# Emits:
+#     .github/copilot-instructions.md            rules (universal baseline + detected stack modules)
+#     .github/copilot-instructions.md           anchor file the agent reads, with memory cloned in
+#     .github/instructions/  (instructions commands generated from the shared skills)
+#
+# Does NOT: commit, modify source code, install dependencies, or run tests.
+
+set -e
+
+RED=$'\033[0;31m'; YELLOW=$'\033[0;33m'; GREEN=$'\033[0;32m'
+BLUE=$'\033[0;34m'; NC=$'\033[0m'; BOLD=$'\033[1m'
+
+KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_INPUT="${1:-.}"
+
+if [ "$TARGET_INPUT" = "--help" ] || [ "$TARGET_INPUT" = "-h" ]; then
+    cat <<EOF
+${BOLD}copilot-init.sh${NC} — install the GitHub Copilot kit into a target project
+
+${BOLD}Usage:${NC}
+    bash copilot-init.sh [target-path]
+
+${BOLD}Emits:${NC}
+    .github/copilot-instructions.md
+    .github/copilot-instructions.md
+    .github/instructions/  (instructions commands generated from the shared skills)
+
+${BOLD}Examples:${NC}
+    bash $KIT_DIR/copilot-init.sh
+    bash $KIT_DIR/copilot-init.sh /path/to/project
+
+${BOLD}After running:${NC}
+    Reference @$KIT_DIR/BOOTSTRAP.md in GitHub Copilot to finish the
+    conversational phases (context, audits, memory).
+EOF
+    exit 0
+fi
+
+[ -d "$TARGET_INPUT" ] || { printf '%sTarget does not exist or is not a directory: %s%s\n' "$RED" "$TARGET_INPUT" "$NC" >&2; exit 1; }
+TARGET="$(cd "$TARGET_INPUT" && pwd)"
+PROJECT_NAME="$(basename "$TARGET")"
+
+if [ "$KIT_DIR" = "$TARGET" ]; then
+    printf '%sRefusing to install the kit into itself.%s\n' "$RED" "$NC" >&2
+    exit 1
+fi
+
+MEMORY_KEY="$(printf '%s' "$TARGET" | sed 's|/|-|g')"
+MEMORY_ROOT="$HOME/.agents/projects/${MEMORY_KEY}/memory"
+export TARGET PROJECT_NAME MEMORY_ROOT
+export AGENT_TARGET="copilot"
+
+printf '\n%sGitHub Copilot kit%s\n' "$BOLD" "$NC"
+printf '  Kit:      %s\n' "$KIT_DIR"
+printf '  Project:  %s\n' "$TARGET"
+printf '  Memory:   %s\n\n' "$MEMORY_ROOT"
+
+. "$KIT_DIR/scripts/_subst.sh"
+. "$KIT_DIR/scripts/_detect_stacks.sh"
+
+# ============================================================
+# Directories
+# ============================================================
+mkdir -p "$(dirname "$TARGET/.github/copilot-instructions.md")"
+mkdir -p "$(dirname "$TARGET/.github/copilot-instructions.md")"
+mkdir -p "$TARGET/.github"
+mkdir -p "$TARGET/.github/instructions"
+
+# ============================================================
+# Scripts (agent-agnostic: precommit, hooks, workflow installers)
+# ============================================================
+printf '%sCopying scripts...%s\n' "$BOLD" "$NC"
+SCRIPTS_DIR="$TARGET/.github/scripts"
+mkdir -p "$SCRIPTS_DIR"
+for script in x-precommit.sh install-hooks.sh install-workflows.sh clone-memory.sh; do
+    [ -f "$KIT_DIR/scripts/$script" ] || continue
+    subst_copy "$KIT_DIR/scripts/$script" "$SCRIPTS_DIR/$script"
+    chmod +x "$SCRIPTS_DIR/$script"
+    printf '  %sok%s scripts/%s\n' "$GREEN" "$NC" "$script"
+done
+
+mkdir -p "$TARGET/.github/workflows"
+subst_copy "$KIT_DIR/workflows/x-check.yml" "$TARGET/.github/workflows/x-check.yml"
+printf '  %sok%s workflows/x-check.yml\n' "$GREEN" "$NC"
+
+mkdir -p "$TARGET/.github/templates"
+subst_copy "$KIT_DIR/templates/audit-prompt.md" "$TARGET/.github/templates/audit-prompt.md"
+printf '  %sok%s templates/audit-prompt.md\n\n' "$GREEN" "$NC"
+
+# ============================================================
+# Rules
+# ============================================================
+printf '%sBuilding rules...%s\n' "$BOLD" "$NC"
+RULES_OUT="$TARGET/.github/copilot-instructions.md"
+STACKS="$(detect_stacks)"
+
+build_rules_to() {
+    local out="$1"
+    local backup=""
+    [ -f "$out" ] && { backup="${out}.bak.$(date +%Y%m%d-%H%M%S)"; cp "$out" "$backup"; }
+    subst_copy "$KIT_DIR/rules/rules-baseline.md" "$out"
+    if [ -n "${STACKS:-}" ]; then
+        while IFS= read -r stack; do
+            [ -z "$stack" ] && continue
+            local module="$KIT_DIR/rules/${stack}.md"
+            if [ -f "$module" ]; then
+                printf '\n---\n\n' >> "$out"
+                cat "$module" >> "$out"
+                printf '  %sok%s appended %s\n' "$GREEN" "$NC" "$stack"
+            else
+                printf '  %swarn%s no module for %s\n' "$YELLOW" "$NC" "$stack"
+            fi
+        done <<< "$STACKS"
+    fi
+    [ -n "$backup" ] && printf '  %sbacked up prior rules to %s%s\n' "$BLUE" "$backup" "$NC"
+    # Explicit success: on a fresh install $backup is empty, so the test above
+    # returns 1 and would become this function's exit status under `set -e`.
+    return 0
+}
+build_rules_to "$RULES_OUT"
+printf '  %sok%s .github/copilot-instructions.md\n\n' "$GREEN" "$NC"
+
+# ============================================================
+# Commands / skills
+# ============================================================
+printf '%sGenerating scoped instructions...%s\n' "$BOLD" "$NC"
+mkdir -p "$TARGET/.github/instructions"
+for skill_dir in "$KIT_DIR/skills"/*/; do
+    [ -d "$skill_dir" ] || continue
+    name="$(basename "$skill_dir")"
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    out="$TARGET/.github/instructions/${name}.instructions.md"
+    tmp="$(mktemp)"; subst_copy "$skill_dir/SKILL.md" "$tmp"
+    { printf -- '---\napplyTo: "**"\n---\n\n'; sed '1{/^---$/!q;}; 1,/^---$/d' "$tmp"; } > "$out"
+    rm -f "$tmp"
+    printf '  %sok%s .github/instructions/%s.instructions.md\n' "$GREEN" "$NC" "$name"
+done
+printf '\n'
+
+# ============================================================
+# Memory baseline
+# ============================================================
+printf '%sSeeding memory baseline...%s\n' "$BOLD" "$NC"
+mkdir -p "$MEMORY_ROOT"
+if [ ! -f "$MEMORY_ROOT/feedback_seniority_and_workflow.md" ]; then
+    subst_copy "$KIT_DIR/templates/feedback_seniority_and_workflow.md" "$MEMORY_ROOT/feedback_seniority_and_workflow.md"
+    printf '  %sok%s seeded feedback_seniority_and_workflow.md\n\n' "$GREEN" "$NC"
+else
+    printf '  %sskip%s already present\n\n' "$YELLOW" "$NC"
+fi
+
+# ============================================================
+# Anchor + memory clone
+# ============================================================
+printf '%sGenerating .github/copilot-instructions.md...%s\n' "$BOLD" "$NC"
+subst_copy "$KIT_DIR/templates/COPILOT.md.template" "$TARGET/.github/copilot-instructions.md"
+if ls "$MEMORY_ROOT"/*.md >/dev/null 2>&1; then
+    bash "$SCRIPTS_DIR/clone-memory.sh" "$TARGET/.github/copilot-instructions.md" "$MEMORY_ROOT" >/dev/null || \
+        printf '  %swarn%s memory clone skipped\n' "$YELLOW" "$NC"
+fi
+printf '  %sok%s .github/copilot-instructions.md (memory cloned)\n\n' "$GREEN" "$NC"
+
+
+# ============================================================
+# Plan-mode hook
+# ============================================================
+printf '%sPlan-mode hook...%s\n' "$BOLD" "$NC"
+printf '  %snote%s this agent exposes no UserPromptSubmit hook; the context\n' "$BLUE" "$NC"
+printf '       script is available but not auto-registered.\n\n'
+
+# ============================================================
+# Summary
+# ============================================================
+RULES_COUNT="$(grep -c '^### ' "$RULES_OUT" || true)"
+
+cat <<EOF
+${GREEN}${BOLD}OK copilot-init complete${NC}
+
+${BOLD}Installed at:${NC}
+  ${TARGET}/.github/copilot-instructions.md
+  ${TARGET}/.github/copilot-instructions.md
+  ${TARGET}/.github/scripts/
+
+${BOLD}Summary:${NC}
+  Agent:      GitHub Copilot
+  Rules:      ${RULES_COUNT}
+  Stacks:     ${STACKS:-universal only}
+  Memory key: ${MEMORY_KEY}
+
+${BOLD}Note:${NC} Scoped rules use .instructions.md with applyTo frontmatter globs
+
+${BOLD}Next steps:${NC}
+  1. Finish the bootstrap conversationally — reference:
+     ${BLUE}@${KIT_DIR}/BOOTSTRAP.md${NC}
+  2. Install git hooks:  bash ${TARGET}/.github/scripts/install-hooks.sh all
+  3. Stage CI workflow:  bash ${TARGET}/.github/scripts/install-workflows.sh all
+EOF

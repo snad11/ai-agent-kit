@@ -33,16 +33,17 @@ done
 
 # Which anchor template each kit owns. Anchor templates are the files matching
 # *.md.template; agent-kit holds them all, each kit receives only its own.
+# kits.manifest is the single source of truth for which anchor each kit emits;
+# kit-scaffold.sh maps anchor -> template the same way. Keep the two in step.
 kit_anchor_template() {
-    case "$1" in
-        claude-kit)   printf 'CLAUDE.md.template\n' ;;
-        gemini-kit)   printf 'GEMINI.md.template\n' ;;
-        copilot-kit)  printf 'COPILOT.md.template\n' ;;
-        cursor-kit)   printf 'CURSOR.md.template\n' ;;
-        windsurf-kit) printf 'WINDSURF.md.template\n' ;;
-        cline-kit)    printf 'CLINE.md.template\n' ;;
-        aider-kit)    printf 'CONVENTIONS.md.template\n' ;;
-        *)            printf 'AGENTS.md.template\n' ;;
+    local kit="$1" anchor
+    if [ "$kit" = "claude-kit" ]; then printf 'CLAUDE.md.template\n'; return; fi
+    anchor="$(awk -F'|' -v k="$kit" '!/^#/ && $1==k {print $4}' "$SRC/kits.manifest" 2>/dev/null)"
+    case "$anchor" in
+        GEMINI.md)                       printf 'GEMINI.md.template\n' ;;
+        CONVENTIONS.md)                  printf 'CONVENTIONS.md.template\n' ;;
+        .github/copilot-instructions.md) printf 'COPILOT.md.template\n' ;;
+        *)                               printf 'AGENTS.md.template\n' ;;
     esac
 }
 
@@ -67,6 +68,8 @@ mirrored_paths() {
         [ -f "$f" ] || continue
         local base; base="$(basename "$f")"
         # Anchor templates belong to exactly one kit: ship this kit's, skip the rest.
+        # The installer template is agent-kit's generator input, never a kit asset.
+        [ "$base" = "kit-init.sh.template" ] && continue
         case "$base" in
             *.md.template) [ "$base" = "$anchor" ] || continue ;;
         esac

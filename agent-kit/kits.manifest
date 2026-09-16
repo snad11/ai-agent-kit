@@ -1,0 +1,23 @@
+# kits.manifest — one row per generated kit. Read by kit-scaffold.sh.
+#
+# Columns (pipe-separated, no spaces around |):
+#   1 kit        directory name, must end in -kit
+#   2 label      human name of the agent
+#   3 tooldir    per-tool directory created in the project ("-" for none)
+#   4 anchor     anchor file path relative to project root
+#   5 rules      where rules.md is written, relative to project root
+#   6 cmddir     directory for generated slash commands ("-" if the agent has none)
+#   7 cmdfmt     toml | md | mdc | instructions | none
+#   8 planhook   claude | zcode | none
+#   9 note       one-line caveat surfaced in the kit README
+#
+# Verified Sept 2026. Re-check before changing: these conventions move fast.
+gemini-kit|Gemini CLI|.gemini|GEMINI.md|.gemini/rules.md|.gemini/commands|toml|none|Custom commands are TOML with prompt/description; reload with /commands reload
+copilot-kit|GitHub Copilot|.github|.github/copilot-instructions.md|.github/copilot-instructions.md|.github/instructions|instructions|none|Scoped rules use .instructions.md with applyTo frontmatter globs
+cursor-kit|Cursor|.cursor|AGENTS.md|.cursor/rules/000-project-rules.mdc|.cursor/commands|mdc|none|Reads AGENTS.md natively; .mdc adds per-glob scoping. Legacy .cursorrules is ignored by Agent mode
+windsurf-kit|Windsurf|.windsurf|AGENTS.md|.windsurf/rules/project-rules.md|.windsurf/workflows|md|none|Current builds prefer .devin/rules/ which takes precedence over .windsurf/
+cline-kit|Cline|.clinerules|AGENTS.md|.clinerules/project-rules.md|-|none|none|Reads .clinerules/ plus .cursorrules, .windsurfrules and AGENTS.md
+codex-kit|Codex CLI|.codex|AGENTS.md|.codex/rules.md|-|none|none|AGENTS.md discovery is tunable via ~/.codex/config.toml (project_doc_max_bytes)
+amp-kit|Amp|-|AGENTS.md|.agents/rules.md|-|none|none|Thin AGENTS.md consumer; no per-tool directory
+zed-kit|Zed|.zed|.rules|.zed/rules.md|-|none|none|.rules outranks AGENTS.md in Zed's priority list, so this kit writes both and keeps them consistent
+aider-kit|Aider|-|CONVENTIONS.md|CONVENTIONS.md|-|none|none|No slash-command concept: the skills ship as documented workflows inside CONVENTIONS.md, not invokable commands
