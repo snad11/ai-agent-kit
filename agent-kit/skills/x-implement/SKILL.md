@@ -65,8 +65,8 @@ Read in this order (unless `--skip-prompt`):
 
 1. `PROMPT_GENERATOR.md` — the prompt-generator framework, if it is available in this environment. It is an optional external reference: when absent, apply the Phase 0 discipline described below directly.
 2. `{{PROJECT_ROOT}}/CLAUDE.md` — project anchor
-3. `{{PROJECT_ROOT}}/.claude/rules.md` — full rules file
-4. The project's memory files, under `~/.claude/projects/` (already loaded into your context — re-reference consciously):
+3. `{{PROJECT_ROOT}}/{{RULES_PATH}}` — full rules file
+4. The project's memory files, under `{{MEMORY_DIR_HINT}}` (already loaded into your context — re-reference consciously):
    - `project_scope.md`
    - `project_features.md`
    - `project_audits.md`
@@ -139,7 +139,7 @@ Score the parsed task on 4 axes. **If ANY axis is below threshold, ask a questio
 
 ### Step 0.5 — Cross-reference rules (rule collision check)
 
-Walk the parsed Instructions + Constraints against `.claude/rules.md`. Specifically check:
+Walk the parsed Instructions + Constraints against `{{RULES_PATH}}`. Specifically check:
 
 - **P-rules** (product scope): does the task build something a `P-` rule puts outside the current scope — a deferred payment flow, a cut feature, an unsupported platform? These are HARD blocks. If the task asks for one, STOP and refuse.
 - **A-rules** (auth): Does the task touch login/tokens/role checks? Apply A-01 through A-09.
@@ -227,7 +227,7 @@ ALWAYS list these explicitly, so the user can see the skill is enforcing them:
 
 ### What I'll do in Phase 2
 - Read every file modified in Phase 1
-- Apply every rule's Detect pattern from `.claude/rules.md`
+- Apply every rule's Detect pattern from `{{RULES_PATH}}`
 - **Check W-02 + M-FL-12**: every new feature file has a matching test file (unless `--no-tests` was set and justified)
 - Auto-fix critical (S-/A-/X-/P-) violations introduced by my work
 - Report Medium violations that need structural changes
@@ -357,7 +357,7 @@ Run this BEFORE Phase 2:
    ```bash
    git diff -U0 -- <paths I touched> | grep -E '^\+\s*(//|/\*|\*)' | head -50
    ```
-2. **For each new comment, ask: does this belong inline, in the symbol's docblock, or nowhere?** Use this decision rule (mirrors `.claude/rules.md` Q-12):
+2. **For each new comment, ask: does this belong inline, in the symbol's docblock, or nowhere?** Use this decision rule (mirrors `{{RULES_PATH}}` Q-12):
 
    | Comment shape | Verdict | Action |
    |---|---|---|
@@ -377,7 +377,7 @@ This is a behavioral gate, not a metrics gate: the goal is that the user never h
 
 ## Phase 2 — Self-check + auto-fix
 
-Same as the original `/x-implement` Phase 2. Audit YOUR OWN work against every rule in `.claude/rules.md`. Auto-fix critical violations. Report the rest.
+Same as the original `/x-implement` Phase 2. Audit YOUR OWN work against every rule in `{{RULES_PATH}}`. Auto-fix critical violations. Report the rest.
 
 ### Step 2.1 — Determine the file set
 
@@ -385,7 +385,7 @@ Same as the original `/x-implement` Phase 2. Audit YOUR OWN work against every r
 
 ### Step 2.2 — Read the rules fresh
 
-Read `.claude/rules.md` again. The user may have added rules between Phase 0 and Phase 2.
+Read `{{RULES_PATH}}` again. The user may have added rules between Phase 0 and Phase 2.
 
 ### Step 2.3 — Audit each file against EVERY rule
 
@@ -414,7 +414,7 @@ print(f"Q-13 hits: {hits}")
 ' <modified-files>
 ```
 
-Then grep the same files for `&mdash;`, `&ndash;`, `&hellip;` (these render literally when they live in JS string literals). Also walk the AI-tell vocabulary list in `.claude/rules.md` (uniquely sensitive, critically, leverage, robust, tapestry, …) against every file you wrote or edited.
+Then grep the same files for `&mdash;`, `&ndash;`, `&hellip;` (these render literally when they live in JS string literals). Also walk the AI-tell vocabulary list in `{{RULES_PATH}}` (uniquely sensitive, critically, leverage, robust, tapestry, …) against every file you wrote or edited.
 
 False positive watch: ignore matches in comments/markdown/test fixtures unless the rule explicitly applies.
 

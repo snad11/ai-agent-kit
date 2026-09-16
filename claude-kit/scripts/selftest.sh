@@ -47,7 +47,7 @@ check_clean() {
 
     # Only the sed-managed tokens must be gone; audit-prompt.md keeps its
     # deliberately LLM-filled placeholders.
-    if grep -rnE '\{\{(PROJECT_ROOT|PROJECT_NAME|MEMORY_ROOT)\}\}' "$PROJ/.claude" >"$WORK/hits" 2>/dev/null; then
+    if grep -rnE '\{\{(PROJECT_ROOT|PROJECT_NAME|MEMORY_ROOT|ANCHOR_FILE|RULES_PATH|SKILLS_DIR|TEMPLATES_DIR|AGENT_TARGET|MEMORY_DIR_HINT)\}\}' "$PROJ/.claude" >"$WORK/hits" 2>/dev/null; then
         fail "$label: unsubstituted tokens"; sed 's/^/       /' "$WORK/hits"
     else
         pass "$label: all tokens substituted"

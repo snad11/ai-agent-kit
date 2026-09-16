@@ -11,7 +11,7 @@ You are auditing ONE file against the master rule file. Same logic as `/x-check`
 
 ## Inputs
 
-- **Rule source**: `{{PROJECT_ROOT}}/.claude/rules.md` — read fresh on every invocation
+- **Rule source**: `{{PROJECT_ROOT}}/{{RULES_PATH}}` — read fresh on every invocation
 - **Target file**: parsed from $ARGUMENTS (the first non-flag argument)
 - **Severity filter**: optional `--severity critical|high|all` (default: all)
 
@@ -36,7 +36,7 @@ Use the Read tool. If it's larger than 2000 lines, read it in chunks. Don't skip
 
 ### 3. Read the rules
 
-Read `{{PROJECT_ROOT}}/.claude/rules.md` in full. Apply the severity filter if provided (see /x-check for the filter logic).
+Read `{{PROJECT_ROOT}}/{{RULES_PATH}}` in full. Apply the severity filter if provided (see /x-check for the filter logic).
 
 ### 4. Apply EVERY rule line-by-line
 
@@ -47,7 +47,7 @@ For each rule:
 
 Don't shortcut. If a rule has 5 forbidden tokens, search for all 5. If a rule has a regex pattern, apply it.
 
-**Q-13 sub-pass (mandatory):** run the Python Unicode scan from `.claude/rules.md` Q-13 against the file (BSD `grep` on macOS can't do Unicode classes). Also grep `&mdash;|&ndash;|&hellip;`. Also walk the AI-tell vocabulary list (`uniquely sensitive`, `critically,`, `leverage`, `robust`, `tapestry`, `delve`, `seamlessly`, "It's worth noting that…"). Report every hit under Critical with the offending line.
+**Q-13 sub-pass (mandatory):** run the Python Unicode scan from `{{RULES_PATH}}` Q-13 against the file (BSD `grep` on macOS can't do Unicode classes). Also grep `&mdash;|&ndash;|&hellip;`. Also walk the AI-tell vocabulary list (`uniquely sensitive`, `critically,`, `leverage`, `robust`, `tapestry`, `delve`, `seamlessly`, "It's worth noting that…"). Report every hit under Critical with the offending line.
 
 **Watch for false positives**: if the file is a markdown doc / spec / audit / rule file itself, the strings appear legitimately — but the user is asking about a code file, so this is unlikely. Still, if the file is `.md` and you're getting hundreds of "violations", suggest the user meant a different file.
 

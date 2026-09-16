@@ -1,17 +1,17 @@
 ---
 name: x-add-rule
-description: Append a new rule to .claude/rules.md in the right category, with auto-numbering and full Why/Detect/Fix template
+description: Append a new rule to {{RULES_PATH}} in the right category, with auto-numbering and full Why/Detect/Fix template
 argument-hint: "<category-letter> <one-line description>"
 allowed-tools: [Read, Edit, Bash]
 ---
 
 # /x-add-rule — Add a new rule to the master rule file
 
-You are adding a new rule to `{{PROJECT_ROOT}}/.claude/rules.md`. Use this when the user says "add a rule for X" or describes a new constraint they want enforced going forward.
+You are adding a new rule to `{{PROJECT_ROOT}}/{{RULES_PATH}}`. Use this when the user says "add a rule for X" or describes a new constraint they want enforced going forward.
 
 ## Inputs
 
-- **Rule source**: `{{PROJECT_ROOT}}/.claude/rules.md`
+- **Rule source**: `{{PROJECT_ROOT}}/{{RULES_PATH}}`
 - **User input**: $ARGUMENTS — first token is the category letter, rest is a one-line description
 
 ## Steps
@@ -33,7 +33,7 @@ If the user provides a full word ("product", "security"), match it to the letter
 
 ### 2. Read the rules file + find the next number
 
-1. Read `{{PROJECT_ROOT}}/.claude/rules.md`.
+1. Read `{{PROJECT_ROOT}}/{{RULES_PATH}}`.
 2. Find all existing rule IDs in the target category. They look like `### P-01`, `### S-12`, etc.
 3. Pick the next sequential number. E.g. if `S-01` through `S-12` exist, the new rule is `S-13`.
 
@@ -72,7 +72,7 @@ Find the `**Last updated:**` line near the top and update it to today's date.
 Output:
 ```
 ✅ Added rule <NEW-ID> — <title> to category <name>.
-File: [.claude/rules.md]({{PROJECT_ROOT}}/.claude/rules.md)
+File: [{{RULES_PATH}}]({{PROJECT_ROOT}}/{{RULES_PATH}})
 Run /x-check to verify it picks up your existing code.
 ```
 

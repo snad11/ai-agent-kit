@@ -11,7 +11,7 @@ You are running a comprehensive, line-by-line audit of one or all repos in this 
 
 ## Inputs
 
-- **Audit prompt template**: `.claude/templates/audit-prompt.md` — read fresh
+- **Audit prompt template**: `{{TEMPLATES_DIR}}/audit-prompt.md` — read fresh
 - **Project root**: `{{PROJECT_ROOT}}` (or current working directory)
 - **Argument**: $ARGUMENTS (parse for `--repo`, `--output`, `--quick`)
 
@@ -67,7 +67,7 @@ For each detected repo.
 
 ### Step 4 — Read the audit prompt template
 
-Read `.claude/templates/audit-prompt.md` in full. This template contains the full audit instructions with placeholders.
+Read `{{TEMPLATES_DIR}}/audit-prompt.md` in full. This template contains the full audit instructions with placeholders.
 
 ### Step 5 — Launch audit agents
 
@@ -121,7 +121,7 @@ Cross-repo index: <project>/audits/README.md
 
 ### Step 7 — Update memory (if memory folder exists)
 
-If the project's memory directory (under `~/.claude/projects/`) exists:
+If the project's memory directory (under `{{MEMORY_DIR_HINT}}`) exists:
 1. Create or update `project_audits.md` with the audit summary
 2. Update `MEMORY.md` index if the audit file is new
 

@@ -1,17 +1,17 @@
 ---
 name: x-rules
-description: List all {{PROJECT_NAME}} project rules from .claude/rules.md, organized by category. Optional filter by category letter (P/A/S/D/Q/B/M/W/X) or name.
+description: List all {{PROJECT_NAME}} project rules from {{RULES_PATH}}, organized by category. Optional filter by category letter (P/A/S/D/Q/B/M/W/X) or name.
 argument-hint: "[category-letter-or-name]"
 allowed-tools: [Read, Glob, Grep]
 ---
 
 # /x-rules — List project rules
 
-You are listing the {{PROJECT_NAME}} project rules. The single source of truth is `{{PROJECT_ROOT}}/.claude/rules.md`. Read it fresh — do NOT rely on memory of past invocations, the file may have been edited.
+You are listing the {{PROJECT_NAME}} project rules. The single source of truth is `{{PROJECT_ROOT}}/{{RULES_PATH}}`. Read it fresh — do NOT rely on memory of past invocations, the file may have been edited.
 
 ## Steps
 
-1. **Read** `{{PROJECT_ROOT}}/.claude/rules.md` in full.
+1. **Read** `{{PROJECT_ROOT}}/{{RULES_PATH}}` in full.
 2. **Parse** the rules. Each rule has the format:
    - Category-letter prefix: `P-` (Product), `A-` (Auth), `S-` (Security), `D-` (Data/Privacy), `Q-` (Quality), `B-` (Backend), `M-` (Mobile), `W-` (Admin Web), `X-` (Audit-derived).
    - Each rule has: `### <ID> — <title>`, `**Status:**`, `**Why:**`, `**Detect:**`, `**Fix:**`.
@@ -20,8 +20,8 @@ You are listing the {{PROJECT_NAME}} project rules. The single source of truth i
    - `/x-rules P` → only product rules
    - `/x-rules security` → only security rules (`S-` prefix)
    - `/x-rules audit` → only audit-derived rules (`X-` prefix)
-4. **Output** as a markdown table per category with columns: `ID | Title | Status | One-line summary`. Skip the long Why/Detect/Fix sections — those are in the source file. Use markdown links: `[ID]({{PROJECT_ROOT}}/.claude/rules.md#<anchor>)` so the user can click through to the full text.
-5. **End with**: rule count + `Last updated` field from the file + a one-line reminder of how to add new rules ("edit `.claude/rules.md` and add your rule to the appropriate category — `/x-check` will pick it up next run").
+4. **Output** as a markdown table per category with columns: `ID | Title | Status | One-line summary`. Skip the long Why/Detect/Fix sections — those are in the source file. Use markdown links: `[ID]({{PROJECT_ROOT}}/{{RULES_PATH}}#<anchor>)` so the user can click through to the full text.
+5. **End with**: rule count + `Last updated` field from the file + a one-line reminder of how to add new rules ("edit `{{RULES_PATH}}` and add your rule to the appropriate category — `/x-check` will pick it up next run").
 
 ## Constraints
 

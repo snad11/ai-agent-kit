@@ -35,7 +35,7 @@ The shorthand **`PG <task>`** in any message is equivalent to `/x-prompt <task>`
 
 ## Steps
 
-1. **Read** `{{PROJECT_ROOT}}/.claude/skills/x-implement/SKILL.md` in full to load the canonical instructions.
+1. **Read** `{{PROJECT_ROOT}}/{{SKILLS_DIR}}/x-implement/SKILL.md` in full to load the canonical instructions.
 2. **Apply** the `/x-implement` skill's instructions with `--plan-only` set.
 3. **Execute Phase 0 only** per those instructions.
 4. **Stop** at the end of Phase 0 with the message: "Phase 0 complete. Plan-only mode — Phase 1 + 2 not run. Reply 'go' (or call `/x-implement <task>`) to proceed, or refine the scope above and re-invoke."

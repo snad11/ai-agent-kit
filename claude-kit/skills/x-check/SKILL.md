@@ -13,7 +13,7 @@ You are auditing uncommitted/changed files in the {{PROJECT_NAME}} project again
 
 ## Inputs
 
-- **Rule source**: `{{PROJECT_ROOT}}/.claude/rules.md` — read fresh on every invocation
+- **Rule source**: `{{PROJECT_ROOT}}/{{RULES_PATH}}` — read fresh on every invocation
 - **Repos to scan** (parse from $ARGUMENTS, default = all detected): auto-detect by listing direct child directories of `{{PROJECT_ROOT}}` that contain a `.git/` directory. The `--repo <name>` flag may reference any such directory.
 - **Argument**: $ARGUMENTS (parse for `--repo`, `--staged-only`, `--severity`)
 
@@ -32,7 +32,7 @@ For each target repo:
 
 ### 2. Read the rules
 
-Read `{{PROJECT_ROOT}}/.claude/rules.md` in full. Build a mental index of rules by category. If `--severity` was passed, filter rules:
+Read `{{PROJECT_ROOT}}/{{RULES_PATH}}` in full. Build a mental index of rules by category. If `--severity` was passed, filter rules:
 - `critical` → only rules with severity hints like "Critical CVE-equivalent", "Critical finding", "broken", "bypass", etc. in the Why field
 - `high` → critical + high (rules touching auth, secrets, payments)
 - `all` → everything (default)
@@ -54,7 +54,7 @@ For each file in the file set:
 3. Don't shortcut. When a rule lists several tokens, grep for ALL of them, not just the first. Don't give up after finding one violation per file — report all of them.
 4. Watch for false positives. If the file is the audit MD, the spec MD, the rules MD itself, or a memory file, the strings will appear there legitimately — skip those. Code files (`*.ts`, `*.tsx`, `*.dart`, `*.kt`, `*.swift`, `*.sql`) are the targets.
 
-**Q-13 sub-pass (mandatory):** for every file in the set, run the Python Unicode scan from `.claude/rules.md` Q-13 (BSD `grep` on macOS can't do Unicode classes), then grep `&mdash;|&ndash;|&hellip;`, then look for AI-tell vocabulary (`uniquely sensitive`, `critically,`, `leverage`, `robust`, `tapestry`, `delve`, `seamlessly`, "It's worth noting that…", triplet-rhythm lists). Report Q-13 violations under Critical and include the offending line for each hit. Over-commenting (Q-12) is a Critical/blocking finding too, scanned every run: flag (a) the same params documented twice — per-field JSDoc on an interface/props AND a duplicate `@param` block; (b) `/** */` or `//` on self-explanatory fields/props/enum members; (c) comments that narrate the next line or a comment on nearly every line; (d) essay docblocks where 1-2 lines suffice; AND (e) non-trivial or exported functions/classes missing a concise doc comment. The character set is always Critical; AI-tell prose in user-facing copy (legal, marketing, dialog/tile descriptions) is Critical; AI-tell prose in internal comments/docblocks is Medium.
+**Q-13 sub-pass (mandatory):** for every file in the set, run the Python Unicode scan from `{{RULES_PATH}}` Q-13 (BSD `grep` on macOS can't do Unicode classes), then grep `&mdash;|&ndash;|&hellip;`, then look for AI-tell vocabulary (`uniquely sensitive`, `critically,`, `leverage`, `robust`, `tapestry`, `delve`, `seamlessly`, "It's worth noting that…", triplet-rhythm lists). Report Q-13 violations under Critical and include the offending line for each hit. Over-commenting (Q-12) is a Critical/blocking finding too, scanned every run: flag (a) the same params documented twice — per-field JSDoc on an interface/props AND a duplicate `@param` block; (b) `/** */` or `//` on self-explanatory fields/props/enum members; (c) comments that narrate the next line or a comment on nearly every line; (d) essay docblocks where 1-2 lines suffice; AND (e) non-trivial or exported functions/classes missing a concise doc comment. The character set is always Critical; AI-tell prose in user-facing copy (legal, marketing, dialog/tile descriptions) is Critical; AI-tell prose in internal comments/docblocks is Medium.
 
 ### 4. Report
 
