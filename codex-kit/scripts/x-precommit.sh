@@ -51,6 +51,8 @@ ${BOLD}Usage:${NC}
     bash x-precommit.sh                  Run check on staged files (default = precommit mode)
     bash x-precommit.sh --ci <base-ref>  Run check on files changed since <base-ref> (CI mode)
                                          e.g. --ci origin/main
+    bash x-precommit.sh --ci-messages <base-ref>
+                                         Check commit messages since <base-ref> for AI attribution (Q-15)
     bash x-precommit.sh --list           List the critical patterns this hook enforces
     bash x-precommit.sh --help           Show this help
 
@@ -179,6 +181,35 @@ scan_pattern() {
 }
 
 # ============================================================
+# Q-15: AI attribution in commit messages (commit-msg hook + CI)
+# ============================================================
+
+Q15_PATTERN='^[[:space:]]*co-authored-by:.*(anthropic|claude (code|opus|sonnet|haiku|fable)|cursor|copilot|codex|openai|chatgpt|gemini|windsurf|codeium|cline|aider|ampcode|devin|[^a-z]ai[^a-z])|^[[:space:]]*co-authored-by:[[:space:]]*claude[[:space:]]*<|noreply@anthropic\.com|generated (with|by) .*(claude|cursor|copilot|codex|chatgpt|openai|gemini|windsurf|cline|aider|devin)|🤖'
+
+# Print every line of the commit message on stdin that credits an AI tool.
+q15_hits() {
+    grep -v '^#' | grep -inE "$Q15_PATTERN" || true
+}
+
+# Print one Q-15 violation block. $1 = where (commit sha or "this commit"), $2 = offending lines.
+report_q15() {
+    printf "${RED}${BOLD}🔴 Q-15 AI attribution in commit message${NC} (%s)\n" "$1"
+    printf "%s\n" "$2" | sed 's/^/   /'
+    printf "   ${BOLD}Fix:${NC} remove the AI co-author trailer / \"Generated with\" line. See Q-15.\n\n"
+}
+
+# Installed as .git/hooks/commit-msg by install-hooks.sh; git passes the message file as $1.
+if [ "$(basename "$0")" = "commit-msg" ]; then
+    hits=$(q15_hits < "${1:?commit-msg hook needs the message file}")
+    if [ -n "$hits" ]; then
+        report_q15 "this commit" "$hits"
+        printf "${RED}${BOLD}❌ x-precommit: commit message BLOCKED${NC}\n"
+        exit 1
+    fi
+    exit 0
+fi
+
+# ============================================================
 # Argument parsing
 # ============================================================
 
@@ -198,6 +229,23 @@ case "${1:-}" in
             echo "${RED}--ci requires a base ref argument (e.g. --ci origin/main)${NC}" >&2
             exit 2
         fi
+        ;;
+    --ci-messages)
+        base="${2:-}"
+        if [ -z "$base" ] || ! git rev-parse --verify "$base" >/dev/null 2>&1; then
+            echo "${RED}--ci-messages requires an existing base ref (e.g. --ci-messages origin/main)${NC}" >&2
+            exit 2
+        fi
+        failed=0
+        for sha in $(git rev-list "$base"..HEAD); do
+            hits=$(git log -1 --format=%B "$sha" | q15_hits)
+            if [ -n "$hits" ]; then
+                report_q15 "$(git rev-parse --short "$sha")" "$hits"
+                failed=1
+            fi
+        done
+        [ "$failed" -eq 0 ] && printf "${GREEN}${BOLD}✅ x-precommit: no AI attribution in commit messages${NC}\n"
+        exit "$failed"
         ;;
     --test)
         echo "${BOLD}Test mode not yet implemented.${NC}"

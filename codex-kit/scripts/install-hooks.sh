@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-hooks.sh - Install x-precommit.sh as the pre-commit hook in one or all detected git repos
+# install-hooks.sh - Install x-precommit.sh as the pre-commit and commit-msg hooks in one or all detected git repos
 #
 # Usage:
 #     bash install-hooks.sh <repo> [--force]
@@ -118,7 +118,7 @@ install_for_repo() {
     else
         repo_path="${PROJECT_ROOT}/${repo_name}"
     fi
-    local target="${repo_path}/.git/hooks/pre-commit"
+    local hooks_dir="${repo_path}/.git/hooks"
 
     if [ ! -d "$repo_path" ]; then
         printf "${RED}❌ %s: repo path does not exist (%s)${NC}\n" "$repo_name" "$repo_path"
@@ -140,20 +140,31 @@ install_for_repo() {
                 /*) : ;;
                 *)  gitdir="${repo_path}/${gitdir}" ;;
             esac
-            target="${gitdir}/hooks/pre-commit"
-            mkdir -p "$(dirname "$target")"
+            hooks_dir="${gitdir}/hooks"
+            mkdir -p "$hooks_dir"
         fi
     fi
 
+    local status=0 hook
+    for hook in pre-commit commit-msg; do
+        install_hook "$repo_name" "${hooks_dir}/${hook}" "$hook" || status=1
+    done
+    return $status
+}
+
+# Copy x-precommit.sh to one hook path. The script picks its mode from the hook name.
+install_hook() {
+    local repo_name="$1" target="$2" hook="$3"
+
     # Already up to date?
     if [ -f "$target" ] && cmp -s "$SOURCE_HOOK" "$target"; then
-        printf "${GREEN}✓ %s: already up-to-date${NC}\n" "$repo_name"
+        printf "${GREEN}✓ %s: %s already up-to-date${NC}\n" "$repo_name" "$hook"
         return 0
     fi
 
     # Existing hook that ISN'T ours?
     if [ -f "$target" ] && [ "$FORCE" != "--force" ]; then
-        printf "${YELLOW}⚠ %s: existing pre-commit hook found at %s${NC}\n" "$repo_name" "$target"
+        printf "${YELLOW}⚠ %s: existing %s hook found at %s${NC}\n" "$repo_name" "$hook" "$target"
         printf "  Diff vs source:\n"
         diff -q "$SOURCE_HOOK" "$target" || true
         printf "  Pass --force to overwrite, or back it up manually first.\n"
@@ -169,7 +180,7 @@ install_for_repo() {
 
     cp "$SOURCE_HOOK" "$target"
     chmod +x "$target"
-    printf "${GREEN}✓ %s: installed at %s${NC}\n" "$repo_name" "$target"
+    printf "${GREEN}✓ %s: %s installed at %s${NC}\n" "$repo_name" "$hook" "$target"
     return 0
 }
 

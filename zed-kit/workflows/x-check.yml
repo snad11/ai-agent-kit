@@ -73,6 +73,8 @@ jobs:
           set +e
           NO_COLOR=1 bash .github/scripts/x-precommit.sh --ci ${{ steps.base.outputs.ref }} 2>&1 | tee x-check-output.txt
           EXIT=${PIPESTATUS[0]}
+          NO_COLOR=1 bash .github/scripts/x-precommit.sh --ci-messages ${{ steps.base.outputs.ref }} 2>&1 | tee -a x-check-output.txt
+          [ "${PIPESTATUS[0]}" -ne 0 ] && EXIT=1
           # Count violations from output for the summary.
           # Use `|| true` (NOT `|| echo 0`): when grep finds 0 matches it prints "0" AND exits 1,
           # so `|| echo 0` appends a second "0" and produces multi-line output, which breaks $GITHUB_OUTPUT.

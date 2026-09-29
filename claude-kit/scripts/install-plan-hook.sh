@@ -39,6 +39,10 @@ if os.path.exists(path):
             data = json.load(f)
         except json.JSONDecodeError:
             data = {}
+# Q-15: stop Claude Code from appending its co-author trailer / PR footer.
+no_attr = {"attribution": {"commit": "", "pr": ""}, "includeCoAuthoredBy": False}
+attr_changed = any(data.get(k) != v for k, v in no_attr.items())
+data.update(no_attr)
 hooks = data.setdefault("hooks", {})
 ups = hooks.setdefault("UserPromptSubmit", [])
 already = any(
@@ -50,10 +54,13 @@ if already:
     print("  · hook already present — skipped")
 else:
     ups.append({"hooks": [{"type": "command", "command": cmd}]})
+    print("  ✓ registered UserPromptSubmit hook")
+if attr_changed:
+    print("  ✓ disabled Claude co-author trailer (Q-15)")
+if attr_changed or not already:
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
         f.write("\n")
-    print("  ✓ registered UserPromptSubmit hook")
 PY
 
 printf '  ✓ scripts/plan-mode-context.sh\n'
