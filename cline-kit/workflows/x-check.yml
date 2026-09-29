@@ -53,6 +53,9 @@ jobs:
         id: gate
         env:
           GH_TOKEN: ${{ github.token }}
+          # Its own marker namespace. A project that gates its own CI workflow on the
+          # default salt must not be able to skip it on this scanner's evidence.
+          VERIFY_SALT: x-check-v1
         run: bash .github/scripts/verified_tree.sh
 
       - name: Determine base ref

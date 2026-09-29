@@ -10,14 +10,19 @@
 # Stack-agnostic: it knows nothing about the language or the checks being skipped.
 #
 # Env: GH_TOKEN (needs the actions: read permission), GITHUB_REPOSITORY, GITHUB_OUTPUT
+#      VERIFY_SALT (optional) names the check set this marker stands for; default v1
 # Writes to GITHUB_OUTPUT: tree, marker, verified (true | false)
 #
 # Usage, from the repo root:
 #   bash tool/ci/verified_tree.sh
 set -euo pipefail
 
-# Bump to make every tree verify again, e.g. after a runner or toolchain change.
-salt=v1
+# Namespaces the marker. Two workflows that run DIFFERENT checks must not share one: the
+# marker means "this tree passed these checks", so a shared name lets one skip on the
+# other's evidence, e.g. a rule scanner passing would excuse the whole test suite.
+# Workflows that run the SAME checks should share it deliberately. Bump the version part
+# to make every tree verify again, e.g. after a runner or toolchain change.
+salt="${VERIFY_SALT:-v1}"
 
 : "${GITHUB_REPOSITORY:?}" "${GITHUB_OUTPUT:?}"
 

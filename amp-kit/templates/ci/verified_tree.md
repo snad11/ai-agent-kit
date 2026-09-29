@@ -111,6 +111,26 @@ jobs:
           retention-days: 30
 ```
 
+## One marker per check set
+
+The marker asserts "this tree passed *these* checks". A repo with more than one gated workflow must
+therefore give each its own marker, or the first to finish excuses the rest: a rule scanner passing
+would let the CI workflow skip lint, types, the test suite and the build. Set `VERIFY_SALT` per
+workflow, in the gate step's `env:` beside `GH_TOKEN`:
+
+```yaml
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_SALT: ci-v1        # x-check-v1, mobile-v1, ...
+```
+
+Share a salt only when the workflows genuinely run the same checks. Vienna's `mobile.yml` and its two
+release workflows share the default `v1` on purpose: all three analyze and test the same way, so a
+pass in one is a pass for the others.
+
+Changing a salt orphans the markers written under the old one, so the next run of every tree is a
+full one. That is the intended way to force re-verification after a toolchain change.
+
 ## What to gate and what to leave alone
 
 | Gate it | Leave it running |

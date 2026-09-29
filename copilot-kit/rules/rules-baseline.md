@@ -472,6 +472,9 @@ multi-job wiring in `templates/ci/verified_tree.md`. Four things the gate must g
   4. **Fail open, never closed.** Any lookup failure means `verified=false`. Skipping must never
      hide unverified code, and a direct push of new code to a downstream branch has a new tree and
      gets the full run.
+  5. **One marker per check set.** The marker asserts which checks a tree passed, so two gated
+     workflows that run different checks need different marker names (`VERIFY_SALT`). Sharing one
+     lets the first to finish excuse the rest: a rule scanner passing would skip the test suite.
 
 ---
 
