@@ -114,7 +114,10 @@ Every item is observable. The bootstrap isn't done until each is true. Verify, d
 - [ ] All 7 skills are present under the target's skills dir and contain no literal `{{TOKEN}}` text
 - [ ] The anchor file (`AGENTS.md` and/or `CLAUDE.md`) exists and carries the cloned memory block
 - [ ] The pre-commit hook is installed AND was smoke-tested against one staged file
-- [ ] `x-check.yml` is staged alongside existing workflows, not over them
+- [ ] `x-check.yml` is staged alongside existing workflows, not over them, with
+      `.github/scripts/verified_tree.sh` beside `x-precommit.sh`
+- [ ] Any repo whose CI repeats a verify job across promotion branches gates it on the tree SHA
+      (rule W-06, `templates/ci/verified_tree.md`)
 - [ ] The plan-mode hook is registered for every active target
 - [ ] `audits/<repo>/` holds one line-by-line audit per detected repo, or the skip reason is stated
 - [ ] Nothing was committed, and no source file was modified
@@ -161,7 +164,8 @@ Commit, push, modify source code, run tests, install deps, configure linters/for
 - **Add a rule**: edit `<project>/.agents/rules.md` (or `/x-add-rule`).
 - **Add a skill**: drop `<name>/SKILL.md` in `<project>/.agents/skills/`.
 - **Update the precommit hook**: edit `.agents/scripts/x-precommit.sh`, re-run `install-hooks.sh all --force`.
-- **Update CI**: edit `.agents/workflows/x-check.yml`, re-run `install-workflows.sh all --force`.
+- **Update CI**: edit `.agents/workflows/x-check.yml` or `.agents/templates/ci/verified_tree.sh`,
+  re-run `install-workflows.sh all --force`.
 - **Propagate kit updates**: `bash agent-kit/agent-sync.sh <project>` re-syncs skills/rules/templates and re-clones memory, preserving project-added rules below the sentinel.
 - **Update the kit itself**: edit `agent-kit/rules/rules-baseline.md` or stack modules; future bootstraps get them; existing projects run `agent-sync.sh`.
 

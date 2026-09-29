@@ -7,7 +7,7 @@ allowed-tools: [Read, Edit, Write, Glob, Grep, Bash]
 
 # /x-implement — The {{PROJECT_NAME}} canonical work command
 
-<!-- kit: agent-kit v1.1 · PROMPT_GENERATOR v3.0 -->
+<!-- kit: agent-kit v1.2 · PROMPT_GENERATOR v3.0 -->
 
 You are doing work in the {{PROJECT_NAME}} project. This is the **single canonical entry point** for any non-trivial coding task. It runs in **3 phases**:
 
@@ -147,6 +147,7 @@ Walk the parsed Instructions + Constraints against `{{RULES_PATH}}`. Specificall
 - **X-rules** (audit-derived): Does the task touch code that the audit flagged broken? Reference the finding.
 - **Q-rules** (quality): Will the implementation need tests (Q-10), need to reuse existing code (Q-11), need to avoid over-comments (Q-12)?
 - **S-13** (error UX): Will the task add new error paths? Then env-gated user-friendly errors are required.
+- **W-06** (CI verifies each unique tree once): does the task add or modify CI, a workflow, or a verify job? Then check how many branches that verification runs on. If the repo has a promotion flow (`development` → `staging` → `production`, `dev` → `staging`, `develop` → `main`) and the same verification would run at more than one hop, the tree-SHA gate is IN SCOPE and must appear in the scope contract as an explicit Phase 1 step, not left as a follow-up. Use `templates/ci/verified_tree.sh` plus the single-job or multi-job wiring in `templates/ci/verified_tree.md`. Gate verification steps only (install, lint, static analysis, type check, test, build check) and never deploys, release builds, signing, store uploads or image pushes. Adding `permissions: actions: read` is part of the change, not optional: without it the artifact lookup 403s and the gate silently fail-safes to a full run.
 - **PERF-rules** (performance / Web Vitals): Does the task touch ANY frontend page, route, component, image, font, provider, dependency, or loading state? Then performance is in scope and must be designed in NOW, not checked afterward. Apply the PERF rules from the project's frontend rule module (e.g. PERF-01 no opacity-0 on the LCP element, PERF-02 loading states need a real contentful element for FCP, PERF-03 above-fold image priority, PERF-04/05 don't ship heavy or disabled-feature deps in the shared/root bundle — code-split them, PERF-06 font preload discipline, PERF-07 loading-state streaming, PERF-08 cache public SSR data, PERF-09 verify the production bundle before deploy). Performance applies to EVERY surface, not just routes a Lighthouse / Speed-Insights report flagged.
 
 **List the rules that will apply** in the scope contract. The user should see which rules constrain the implementation.

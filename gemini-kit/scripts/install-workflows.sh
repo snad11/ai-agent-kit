@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 # install-workflows.sh - Install the x-check GitHub Actions workflow into one or all detected git repos
 #
-# Copies BOTH:
-#   - .claude/workflows/x-check.yml      → <repo>/.github/workflows/x-check.yml
-#   - .claude/scripts/x-precommit.sh     → <repo>/.github/scripts/x-precommit.sh
+# Copies ALL THREE:
+#   - .claude/workflows/x-check.yml         → <repo>/.github/workflows/x-check.yml
+#   - .claude/scripts/x-precommit.sh        → <repo>/.github/scripts/x-precommit.sh
+#   - .claude/templates/ci/verified_tree.sh → <repo>/.github/scripts/verified_tree.sh
 #
-# Both files MUST be committed + pushed to GitHub for the workflow to run on PRs/pushes.
+# verified_tree.sh is the W-06 tree-SHA gate the workflow calls so an unchanged code tree is
+# not re-scanned at every promotion hop. See templates/ci/verified_tree.md.
+#
+# All files MUST be committed + pushed to GitHub for the workflow to run on PRs/pushes.
 # The installer stages them for you but does NOT commit (you review first).
 #
 # Usage:
@@ -38,6 +42,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_WORKFLOW="${SCRIPT_DIR}/../workflows/x-check.yml"
 SOURCE_HOOK="${SCRIPT_DIR}/x-precommit.sh"
+SOURCE_GATE="${SCRIPT_DIR}/../templates/ci/verified_tree.sh"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # ============================================================
@@ -86,8 +91,9 @@ ${BOLD}Flags:${NC}
     --force  overwrite existing files without asking (auto-backs up old versions)
 
 ${BOLD}What it installs:${NC}
-    1. .github/workflows/x-check.yml  ← the workflow definition
-    2. .github/scripts/x-precommit.sh ← the script the workflow calls
+    1. .github/workflows/x-check.yml   ← the workflow definition
+    2. .github/scripts/x-precommit.sh  ← the rule scanner the workflow calls
+    3. .github/scripts/verified_tree.sh ← the W-06 tree-SHA gate (skips an already-scanned tree)
 
 ${BOLD}After install - important:${NC}
     The installer stages the files but does NOT commit them. You must:
@@ -121,6 +127,34 @@ fi
 # Per-repo install
 # ============================================================
 
+# install_one <src> <target> <label> <rel-path> <"exec"|"">
+# Reads FORCE and backup_dir and bumps installed_count from the calling frame.
+install_one() {
+    local src="$1" target="$2" label="$3" rel="$4" mode="$5"
+
+    if [ -f "$target" ] && cmp -s "$src" "$target"; then
+        printf "  ${GREEN}✓${NC} %s already up-to-date\n" "$label"
+        return 0
+    fi
+
+    if [ -f "$target" ] && [ "$FORCE" != "--force" ]; then
+        printf "  ${YELLOW}⚠${NC} existing %s at %s - pass --force to overwrite\n" "$label" "$target"
+        return 0
+    fi
+
+    if [ -f "$target" ]; then
+        local backup="${backup_dir}/$(basename "$target").bak.$(date +%Y%m%d-%H%M%S)"
+        cp "$target" "$backup"
+        printf "  ${BLUE}backed up old %s to %s${NC}\n" "$label" "$backup"
+    fi
+
+    cp "$src" "$target"
+    [ "$mode" = "exec" ] && chmod +x "$target"
+    printf "  ${GREEN}✓${NC} %s installed at %s\n" "$label" "$rel"
+    installed_count=$((installed_count + 1))
+    return 0
+}
+
 install_for_repo() {
     local repo_name="$1"
     local repo_path
@@ -132,6 +166,7 @@ install_for_repo() {
     fi
     local workflow_target="${repo_path}/.github/workflows/x-check.yml"
     local script_target="${repo_path}/.github/scripts/x-precommit.sh"
+    local gate_target="${repo_path}/.github/scripts/verified_tree.sh"
     local installed_count=0
 
     if [ ! -d "$repo_path" ]; then
@@ -155,48 +190,18 @@ install_for_repo() {
     local backup_dir="/tmp/claude-kit-workflow-backups/${safe_name}"
     mkdir -p "$backup_dir"
 
-    # Workflow file
-    if [ -f "$workflow_target" ] && cmp -s "$SOURCE_WORKFLOW" "$workflow_target"; then
-        printf "  ${GREEN}✓${NC} workflow already up-to-date\n"
-    else
-        if [ -f "$workflow_target" ] && [ "$FORCE" != "--force" ]; then
-            printf "  ${YELLOW}⚠${NC} existing workflow at %s - pass --force to overwrite\n" "$workflow_target"
-        else
-            if [ -f "$workflow_target" ] && [ "$FORCE" = "--force" ]; then
-                local backup="${backup_dir}/x-check.yml.bak.$(date +%Y%m%d-%H%M%S)"
-                cp "$workflow_target" "$backup"
-                printf "  ${BLUE}backed up old workflow to %s${NC}\n" "$backup"
-            fi
-            cp "$SOURCE_WORKFLOW" "$workflow_target"
-            printf "  ${GREEN}✓${NC} workflow installed at .github/workflows/x-check.yml\n"
-            installed_count=$((installed_count + 1))
-        fi
-    fi
-
-    # Script file
-    if [ -f "$script_target" ] && cmp -s "$SOURCE_HOOK" "$script_target"; then
-        printf "  ${GREEN}✓${NC} script already up-to-date\n"
-    else
-        if [ -f "$script_target" ] && [ "$FORCE" != "--force" ]; then
-            printf "  ${YELLOW}⚠${NC} existing script at %s - pass --force to overwrite\n" "$script_target"
-        else
-            if [ -f "$script_target" ] && [ "$FORCE" = "--force" ]; then
-                local backup="${backup_dir}/x-precommit.sh.bak.$(date +%Y%m%d-%H%M%S)"
-                cp "$script_target" "$backup"
-                printf "  ${BLUE}backed up old script to %s${NC}\n" "$backup"
-            fi
-            cp "$SOURCE_HOOK" "$script_target"
-            chmod +x "$script_target"
-            printf "  ${GREEN}✓${NC} script installed at .github/scripts/x-precommit.sh\n"
-            installed_count=$((installed_count + 1))
-        fi
-    fi
+    # Each of the three files installs the same way: skip if identical, refuse to clobber
+    # without --force, back up to /tmp when it does clobber, chmod the scripts.
+    install_one "$SOURCE_WORKFLOW" "$workflow_target" "workflow" ".github/workflows/x-check.yml" ""
+    install_one "$SOURCE_HOOK" "$script_target" "script" ".github/scripts/x-precommit.sh" "exec"
+    install_one "$SOURCE_GATE" "$gate_target" "tree gate" ".github/scripts/verified_tree.sh" "exec"
 
     # Stage the changes (don't commit)
     if [ "$installed_count" -gt 0 ]; then
         (
             cd "$repo_path"
-            git add .github/workflows/x-check.yml .github/scripts/x-precommit.sh 2>/dev/null || true
+            git add .github/workflows/x-check.yml .github/scripts/x-precommit.sh \
+                .github/scripts/verified_tree.sh 2>/dev/null || true
         )
         printf "  ${BLUE}staged${NC} for commit (run: cd %s && git diff --staged .github/)\n" "$repo_path"
     fi

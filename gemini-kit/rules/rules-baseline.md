@@ -4,7 +4,7 @@
 
 After bootstrap, you (and the dev team) can edit this file freely to add project-specific rules. The skills (`/x-rules`, `/x-check`, `/x-implement`) read whatever is in `<project>/.claude/rules.md` — they don't care which rules came from the baseline vs the stack modules vs your additions.
 
-**Kit version:** agent-kit v1.1 (mirrored to claude-kit v1.2) · **Last updated:** 2026-08-18
+**Kit version:** agent-kit v1.2 (mirrored to claude-kit v1.3) · **Last updated:** 2026-09-29
 
 Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in one place: the kit repo's root `README.md`. Do not read a version from anywhere else.
 
@@ -445,6 +445,33 @@ Tests NOT run. Choose:
   - `migrate:fresh`, `db:wipe`, `prisma migrate reset` stay blocked outside a verified testing env
     even under (c), unless the user names the database in that same reply.
   - Any report that mentions tests states which env they ran under, or that none ran and why.
+
+---
+
+### W-06 — CI verifies each unique code tree once
+**Status:** ACTIVE
+**Why:** A promotion flow (`development` → `staging` → `production`, `dev` → `staging`, `develop` →
+`main`) runs the same verify job at every hop. A merge does not change the code, so the second and
+third runs re-prove what the first already proved. A 20-minute suite then costs an hour of runner
+time to move one unchanged release through, and every hop is another chance to hit a flake.
+**Detect:** two or more branches in a workflow's `push` / `pull_request` branch list, or two or more
+workflows, running the same verification steps (install, lint, format check, static analysis, type
+check, test, build check), with no gate on the git tree SHA. Also: a repeated verify job gated on the
+commit SHA instead of the tree SHA, which a merge commit changes even when the code does not.
+**Fix:** gate the verify job on the tree SHA. `git rev-parse 'HEAD^{tree}'` names the file contents,
+so it is identical across a merge commit and different after any edit, including a lockfile, a tool
+version file or the workflow itself. A passing run uploads an artifact named `verified-<salt>-<tree>`;
+a later run that finds it skips its checks. Use `templates/ci/verified_tree.sh` and the single-job or
+multi-job wiring in `templates/ci/verified_tree.md`. Four things the gate must get right:
+  1. **The marker is an artifact, never a cache.** Artifacts are repo-wide; Actions caches are
+     branch-scoped and cannot carry the marker to the next branch.
+  2. **`permissions: actions: read`** on the workflow, or the lookup returns 403, the gate
+     fail-safes to `verified=false`, and the change silently saves nothing.
+  3. **Gate verification only.** Deploys, release builds, signing, store uploads and image pushes
+     never carry the guard. A job that consumes a gated job's artifact must be gated too.
+  4. **Fail open, never closed.** Any lookup failure means `verified=false`. Skipping must never
+     hide unverified code, and a direct push of new code to a downstream branch has a new tree and
+     gets the full run.
 
 ---
 

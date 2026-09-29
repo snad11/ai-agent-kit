@@ -64,17 +64,20 @@ mirrored_paths() {
     for f in "$SRC"/rules/*.md;        do [ -f "$f" ] && printf 'rules/%s\n' "$(basename "$f")"; done
     for f in "$SRC"/skills/*/SKILL.md; do [ -f "$f" ] && printf 'skills/%s/SKILL.md\n' "$(basename "$(dirname "$f")")"; done
     for f in "$SRC"/workflows/*;       do [ -f "$f" ] && printf 'workflows/%s\n' "$(basename "$f")"; done
-    for f in "$SRC"/templates/*; do
-        [ -f "$f" ] || continue
-        local base; base="$(basename "$f")"
+    # Recursive, so a grouped template folder (templates/ci/) ships like a flat one.
+    # Paths stay relative to templates/, which is what each kit mirrors.
+    while IFS= read -r f; do
+        local rel base
+        rel="${f#"$SRC"/templates/}"
+        base="$(basename "$f")"
         # Anchor templates belong to exactly one kit: ship this kit's, skip the rest.
         # The installer template is agent-kit's generator input, never a kit asset.
         [ "$base" = "kit-init.sh.template" ] && continue
         case "$base" in
             *.md.template) [ "$base" = "$anchor" ] || continue ;;
         esac
-        printf 'templates/%s\n' "$base"
-    done
+        printf 'templates/%s\n' "$rel"
+    done < <(find "$SRC/templates" -type f ! -name '.DS_Store' | LC_ALL=C sort)
     for s in x-precommit.sh install-hooks.sh install-workflows.sh plan-mode-context.sh \
              _detect_stacks.sh repair-sentinel.sh repair-sentinel.selftest.sh; do
         [ -f "$SRC/scripts/$s" ] && printf 'scripts/%s\n' "$s"

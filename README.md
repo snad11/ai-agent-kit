@@ -150,7 +150,8 @@ Each kit's README lists exactly what it writes: [gemini](gemini-kit/README.md) Â
 Seven skills (`/x-implement`, `/x-check`, `/x-rules`, `/x-prompt`, `/x-check-file`, `/x-add-rule`,
 `/x-audit`), a universal rule baseline plus auto-detected stack modules (NestJS, Laravel, Django,
 Next.js, React, Vue, Flutter and more), a pure-bash pre-commit hook, a matching GitHub Actions
-check, per-project memory files, and a plan-mode context hook.
+check gated so an unchanged code tree is not re-scanned at every promotion hop (rule W-06,
+`templates/ci/`), per-project memory files, and a plan-mode context hook.
 
 Two things vary by agent: whether the skills become invokable commands (see the table above),
 and whether the plan-mode hook is auto-registered â€” only Claude Code and ZCode expose a
@@ -179,9 +180,9 @@ else. Do not read a version from any other file.
 
 | Component | Version |
 |---|---|
-| `agent-kit` | 1.1 |
-| `claude-kit` | 1.2 |
-| `gemini-kit`, `copilot-kit`, `cursor-kit`, `windsurf-kit`, `cline-kit`, `codex-kit`, `amp-kit`, `zed-kit`, `aider-kit` | 1.0 |
+| `agent-kit` | 1.2 |
+| `claude-kit` | 1.3 |
+| `gemini-kit`, `copilot-kit`, `cursor-kit`, `windsurf-kit`, `cline-kit`, `codex-kit`, `amp-kit`, `zed-kit`, `aider-kit` | 1.1 |
 | `PROMPT_GENERATOR.md` | 3.0 |
 
 Agent conventions move fast. The anchor path and command format for each kit are recorded

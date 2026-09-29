@@ -21,6 +21,7 @@ The key insight (proven on the `provx` project): the kit's *content* — rules, 
 | **Memory** | `~/.agents/projects/<key>/memory/` | `~/.claude/projects/<key>/memory/` (claude/all) — **and cloned verbatim into `AGENTS.md`** |
 | **Plan-mode hook** | `.agents/scripts/plan-mode-context.sh` (plain text) | `.zcode/scripts/plan-mode-context.zcode.sh` (JSON wrapper) registered in `.zcode/config.json`; or `.claude/settings.local.json` |
 | **CI workflow** | `.agents/workflows/x-check.yml` | staged into `.github/` per repo |
+| **CI templates** | `.agents/templates/ci/` (`verified_tree.sh` + `verified_tree.md`, the W-06 tree-SHA gate) | `verified_tree.sh` staged into `.github/scripts/` per repo |
 | **Git hooks** | `x-precommit.sh` | installed into `.git/hooks/` per repo (tool-agnostic) |
 
 The **memory-into-anchor clone** is the core generalization: Claude auto-loads its memory folder, but no other agent does. Cloning every memory file verbatim into `AGENTS.md` gives every agent the same always-in-context guarantee. `clone-memory.sh` does this idempotently between markers.
@@ -84,7 +85,7 @@ agent-kit/
 ├── skills/       # 7 skills (copied from claude-kit)
 ├── scripts/      # _subst.sh, x-precommit.sh, install-{hooks,workflows,plan-hook}.sh,
 │                  # plan-mode-context.sh + plan-mode-context.zcode.sh, clone-memory.sh
-├── templates/    # AGENTS.md.template (new), CLAUDE.md.template, audit-prompt.md, ...
+├── templates/    # AGENTS.md.template (new), CLAUDE.md.template, audit-prompt.md, ci/, ...
 └── workflows/    # x-check.yml
 ```
 

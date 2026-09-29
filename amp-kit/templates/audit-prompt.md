@@ -47,6 +47,7 @@ The user wants a *vivid, file-by-file, function-by-function* audit. You have ful
    - Data access patterns (ORM, query builder, raw SQL, repositories)
    - Cross-cutting concerns (logging, error handling, validation, rate limiting)
    - External integrations (third-party APIs, queues, storage, push notifications)
+   - **CI / CD** (read every file in `.github/workflows/`, plus any `.gitlab-ci.yml` / `Jenkinsfile` / `bitbucket-pipelines.yml`): each workflow's trigger branches, its jobs, and which jobs verify (install, lint, format check, static analysis, type check, test, build check) versus deploy (release build, signing, store upload, image push, environment deploy). Note the promotion flow the branch lists imply, whether actions are pinned to commit SHAs or to mutable tags/branches, and whether the same verification runs at more than one hop on unchanged code
 
 3. **One file per top-level {{TOP_FOLDER_TYPE}} under `{{SOURCE_DIR}}/`** named `{{TOP_FOLDER_TYPE}}_<name>.md`. For each:
    - Path
@@ -66,6 +67,7 @@ The user wants a *vivid, file-by-file, function-by-function* audit. You have ful
    - Medium-priority cleanup
    - Performance / Web Vitals issues (LCP, FCP, INP, CLS, TTFB, bundle size — frontend repos)
    - Missing features / TODOs
+   - **CI efficiency and supply chain.** Repeated full verification of an identical code tree across promotion branches is a **Medium** efficiency finding (rule W-06): if the same install / lint / test / build-check work runs again on `staging` and `production` for code a `development` run already passed, report it with the workflow paths, the branch lists, and the per-hop runtime if the workflow file states a `timeout-minutes` or you can infer it. The fix is a tree-SHA gate, not a shorter suite. Also report actions pinned to mutable refs (`@main`, `@master`, a floating major tag) as a finding, and a repeated verify job gated on the commit SHA rather than the tree SHA (a merge commit changes the commit SHA even when the code does not, so the gate never hits)
    - Test coverage gaps (look at `{{TEST_DIR}}/`)
    - Each finding should reference file paths and line numbers using markdown links like `[file.ts:42](../../{{REPO_NAME}}/{{SOURCE_DIR}}/file.ts#L42)`
 
@@ -73,6 +75,7 @@ The user wants a *vivid, file-by-file, function-by-function* audit. You have ful
 
 - Read these config files first: {{KEY_CONFIG_FILES}}
 - Then read the entry point ({{SOURCE_DIR}}/main.* or equivalent)
+- Then read every workflow under `.github/workflows/` (plus any other CI config at the repo root) before walking the source: CI tells you how the project is built, tested and shipped, and what it does not check
 - Then walk `{{SOURCE_DIR}}/` directory by directory and read **every** file
 - Use Glob to enumerate files; use Read to actually read them
 - Be exhaustive — line-by-line / function-by-function coverage. Don't skip "boring" files (interfaces, constants, DTOs) — list them.

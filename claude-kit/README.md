@@ -120,7 +120,7 @@ $KIT/
     ├── scripts/                     ← Portable bash scripts (with {{placeholders}})
     │   ├── x-precommit.sh           ← Pre-commit hook (L3 + L4 shared)
     │   ├── install-hooks.sh         ← Deploy hook into .git/hooks/
-    │   └── install-workflows.sh     ← Deploy workflow + script into .github/
+    │   └── install-workflows.sh     ← Deploy workflow + scripts into .github/
     │
     ├── workflows/
     │   └── x-check.yml              ← GitHub Actions workflow template
@@ -128,6 +128,8 @@ $KIT/
     └── templates/                   ← Document templates (with {{placeholders}})
         ├── CLAUDE.md.template       ← Project anchor
         ├── audit-prompt.md          ← Parameterized audit agent prompt
+        ├── ci/verified_tree.sh      ← W-06 tree-SHA gate (verify each tree once)
+        ├── ci/verified_tree.md      ← How to wire the gate into a verify job
         ├── memory-files-template.md ← Memory file creation guide
         └── feedback_seniority_and_workflow.md  ← Seniority + workflow operating mode
 ```

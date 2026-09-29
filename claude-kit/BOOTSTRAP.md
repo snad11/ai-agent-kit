@@ -265,7 +265,7 @@ Once bootstrap is complete, the user manages the system project-by-project:
 - **Add a rule**: edit `<project>/.claude/rules.md` directly OR use `/x-add-rule <category> <description>`
 - **Add a skill**: drop a new `<name>/SKILL.md` file in `<project>/.claude/skills/`
 - **Update the precommit hook patterns**: edit `<project>/.claude/scripts/x-precommit.sh` and re-run `bash <project>/.claude/scripts/install-hooks.sh all --force`
-- **Update the workflow**: edit `<project>/.claude/workflows/x-check.yml` and re-run `bash <project>/.claude/scripts/install-workflows.sh all --force`
+- **Update the workflow**: edit `<project>/.claude/workflows/x-check.yml` or `<project>/.claude/templates/ci/verified_tree.sh` and re-run `bash <project>/.claude/scripts/install-workflows.sh all --force`
 
 ### Updating the kit itself (affects future bootstraps)
 
