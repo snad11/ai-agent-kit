@@ -44,3 +44,8 @@
 **Status:** ACTIVE
 **Detect:** data migrations with `migrations.RunPython(forward, migrations.RunPython.noop)` where reverse should exist.
 **Fix:** write a real reverse function unless the data migration is genuinely irreversible (document why).
+
+### B-DJ-09 — Serializers list their fields; save only validated data
+**Status:** ACTIVE (BLOCKING; semantic, Django side of Q-20 and D-06)
+**Detect:** `fields = '__all__'` in a serializer or ModelForm; serializer fields no client reads; `request.data` passed to `create` / `update` instead of `serializer.validated_data`.
+**Fix:** list each field explicitly; save from `serializer.validated_data`; assert the response keys in the API test.

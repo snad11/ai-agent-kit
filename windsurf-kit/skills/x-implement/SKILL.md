@@ -59,6 +59,8 @@ Parse `$ARGUMENTS` for:
 
 This is the planning phase. Goal: convert a messy task description into a locked scope contract that Phase 1 must stay inside.
 
+**Small-change path (automatic, W-07).** If the change touches at most 2 files and no API, request shape or schema: skip Steps 0.3 to 0.6 and the contract table; write the one-line usage story (`Given / When / Then`), read only the touched files and their direct callers, implement, run Phase 2 on those files only, and report in 3 to 5 lines. Anything larger, or any API or schema change, takes the full Phase 0.
+
 ### Step 0.1 — Read the foundation files
 
 Read in this order (unless `--skip-prompt`):
@@ -419,7 +421,8 @@ For each modified file:
 1. Every hunk serves a scenario. A refactor, removal, rename or new class/tool that no scenario needs is reverted (Q-19), and the gap you meant to fix goes in the report instead.
 2. Every new migration column has its "no existing column holds this" line in the contract table, with no backfill or legacy shim for code that has not shipped (D-06).
 3. Every new request field and response key has a consumer in the contract table, and the client change is in the same story (Q-20). Remove any key whose consumer is blank.
-4. Flutter: every form field you added or touched passes M-FL-14 (tap outside closes the keyboard, Next/Done chain, submit button reachable).
+4. Mobile: every form field you added or touched passes M-FL-14 / M-RN-10 (tap outside closes the keyboard, Next/Done chain, submit button reachable).
+5. Nothing that worked is broken (Q-19): every removed or renamed field, endpoint, column or export was grepped across all repos of the workspace with no remaining consumer, and the existing typecheck/lint plus the tests nearest the change pass.
 
 **Q-13 is mandatory on every file you wrote or edited.** Run this Python one-liner over the modified set as part of Step 2.3 (BSD `grep` on macOS can't do Unicode classes):
 

@@ -117,11 +117,10 @@ Run via `flutter test --dart-define=ENV=testing test/features/<feature>/<name>_t
 
 ### M-FL-14 — Forms never trap the keyboard
 **Status:** ACTIVE (semantic, enforced by `/x-implement` and code review)
-**Why:** On iOS, a tap outside a `TextField` does not close the keyboard by default, and the number and phone pads have no Done or Next key. Users typed into a form, could not reach the Save button under the keyboard, navigated away to close it, and lost what they typed. Fixing it screen by screen after bug reports left three different dismiss patterns in one app.
-**Detect:** a `TextField` / `TextFormField` with no `onTapOutside` and no dismiss wrapper on its screen; a scroll view holding inputs with no `keyboardDismissBehavior`; a multi-field form with no `textInputAction` chain; `keyboardType: TextInputType.number` / `phone` relying on a Done key; a submit button that the keyboard can cover; `TextEditingController` / `FocusNode` created in `build` or never disposed.
+**Why:** On iOS a tap outside a field doesn't close the keyboard and number/phone pads have no Done key, so users can't reach Save and lose what they typed by navigating away.
+**Detect:** a field with no `onTapOutside` (or shared dismiss wrapper); input scroll views without `keyboardDismissBehavior`; multi-field forms without a `textInputAction` chain; a submit button the keyboard can cover; controllers or focus nodes created in `build` or never disposed.
 **Fix:**
-  - One dismiss pattern per app, in `lib/shared/`: `onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus()` on every field (or one shared wrapper widget), plus `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag` on the scroll view.
-  - Chain fields: `textInputAction: TextInputAction.next` with `onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()`; the last field uses `TextInputAction.done` and submits.
-  - Number and phone pads rely on `onTapOutside` (no key to press), so it is mandatory there.
-  - Keep the submit button reachable: form in a `SingleChildScrollView`, `resizeToAvoidBottomInset` left on, bottom padding `MediaQuery.viewInsetsOf(context).bottom` where a bottom bar holds the CTA.
-  - Controllers and focus nodes live in `State`, are disposed in `dispose()`, and keep the typed text across focus changes and navigation.
+  - One shared dismiss pattern per app: `onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus()` and `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag`.
+  - `textInputAction: TextInputAction.next` + `onFieldSubmitted: (_) => FocusScope.of(context).nextFocus()`; the last field uses `done` and submits.
+  - Keep the CTA reachable: `SingleChildScrollView`, `resizeToAvoidBottomInset` on, bottom padding `MediaQuery.viewInsetsOf(context).bottom` for bottom-bar buttons.
+  - Controllers and focus nodes live in `State` and are disposed.

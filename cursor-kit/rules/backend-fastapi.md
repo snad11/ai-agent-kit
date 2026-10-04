@@ -44,7 +44,7 @@
 **Status:** ACTIVE
 **Why:** Without `response_model`, handlers can leak internal fields (password hashes, internal flags) and the OpenAPI contract drifts.
 **Detect:** route decorators without `response_model=` that return ORM objects or dicts directly.
-**Fix:** set `response_model=<PublicSchema>` and an explicit `status_code=`; the public schema whitelists returnable fields.
+**Fix:** set `response_model=<PublicSchema>` and an explicit `status_code=`; the public schema whitelists returnable fields, and every field in it has a client consumer (Q-20).
 
 ### B-FA-08 — Background/long work goes to the task queue, not `BackgroundTasks` for heavy jobs
 **Status:** ACTIVE

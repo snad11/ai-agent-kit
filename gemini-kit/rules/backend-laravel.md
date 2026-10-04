@@ -64,8 +64,7 @@
 **Detect:** migration files in `database/migrations/` with empty `down()` methods or only `up()` defined.
 **Fix:** every migration has a working `down`. If a column drop is genuinely irreversible (e.g. data loss), document with `// IRREVERSIBLE: explanation` and require explicit acknowledgment in the PR.
 
-### B-LV-12 — API Resources list their fields; requests persist only validated input
-**Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` and code review)
-**Why:** The Laravel side of Q-20 and D-06. `parent::toArray($request)` ships every column, including ones no client reads, and eager-loading a relation "just in case" adds a query for data the row already holds.
-**Detect:** `return parent::toArray($request)` in a `JsonResource`; Resource keys with no client consumer; a `->with('relation')` whose fields the Resource does not output; `$request->all()` / `$request->input()` passed to `create` / `update` / `fill`; a new endpoint or Resource key with no feature test asserting the JSON shape.
-**Fix:** list each key in `toArray` explicitly. Use `whenLoaded('relation')`, `when()` and `whenNotNull()` for optional data instead of always-present nulls. Persist `$request->validated()` only. Each endpoint touched gets a feature test with `assertJsonStructure` (or `assertExactJsonStructure`) matching the contract table.
+### B-LV-12 — API Resources list their fields; persist only validated input
+**Status:** ACTIVE (BLOCKING; semantic, Laravel side of Q-20 and D-06)
+**Detect:** `parent::toArray($request)` in a `JsonResource`; Resource keys no client reads; `->with('rel')` the Resource doesn't output; `$request->all()` / `input()` passed to `create` / `update` / `fill`; a touched endpoint with no JSON-shape test.
+**Fix:** list each key in `toArray`; use `whenLoaded()` / `when()` / `whenNotNull()` for optional data; persist `$request->validated()`; cover each touched endpoint with `assertJsonStructure`.
