@@ -139,6 +139,7 @@ Every item is observable. The bootstrap isn't done until each is true. Verify, d
 - **Do not overwrite an existing `rules.md` that has no sentinel.** Its project rules live above the line the sync preserves, so a rebuild discards them. Run `scripts/repair-sentinel.sh <project>` first, read the report, then sync.
 - **Do not delete the in-project `rules.md.bak-<ts>`** a repair or sync writes. For a project without git it is the only rollback.
 - **Keep tracking ids out of the repos (Q-18, Q-17).** Nothing the bootstrap writes, and nothing written in the project afterwards, cites an epic/story id, an audit finding number, a rule id in parentheses, a spec section tag or a person's name: comments say what the code does or guards against. Commit subjects are Conventional Commits with no story id. The installed `pre-commit` and `commit-msg` hooks and CI enforce both.
+- **Start every change from a usage story (W-07, Q-19, Q-20, D-06).** The agent writes how the user will use the change before coding, changes only what that story needs, and lists each API field with the client that reads it, reusing existing columns. `/x-implement` Phase 0 and Phase 2 enforce this; reviewers check it.
 
 ---
 

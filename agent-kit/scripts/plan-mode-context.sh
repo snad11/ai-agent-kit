@@ -10,6 +10,12 @@ Plan as a senior architect / security engineer. Specifically:
 - Run the /x-implement Phase 0 discipline: read CLAUDE.md, .claude/rules.md, and the
   relevant audits/ + memory, then lock a SCOPE CONTRACT (in-scope / out-of-scope /
   files touched / acceptance) - do not expand scope mid-plan.
+- Open the plan with the usage story (W-07): As a / I want / so that, plus 1-3
+  Given/When/Then lines from the user's side (screen, taps, keyboard, error seen).
+  Size it to the change. Every planned change must trace to a scenario (Q-19).
+- If the plan touches an API or schema, include the contract table (Q-20, D-06):
+  each field, the client file that reads or sends it, and the existing column that
+  holds it. No consumer, no field; no new column when an existing one fits.
 - Apply SOLID + DRY without over-engineering; reuse before create (Q-11).
 - Treat every auth / authZ / data-mutation / secret / PII path as highest-risk;
   bake in ISO 27001 / OWASP Top 10 awareness and user-safe error UX (S-13).

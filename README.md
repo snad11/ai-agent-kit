@@ -153,6 +153,12 @@ Next.js, React, Vue, Flutter and more), a pure-bash pre-commit hook, a matching 
 check gated so an unchanged code tree is not re-scanned at every promotion hop (rule W-06,
 `templates/ci/`), per-project memory files, and a plan-mode context hook.
 
+Every change starts from a usage story: `/x-implement` writes how the user will use the change
+before any code, keeps the diff inside that story, and lists each API field with the client
+that reads it, reusing existing columns (rules W-07, Q-19, Q-20, D-06). Laravel and Flutter
+projects also get explicit API Resources (B-LV-12) and forms that never trap the keyboard
+(M-FL-14).
+
 Two things vary by agent: whether the skills become invokable commands (see the table above),
 and whether the plan-mode hook is auto-registered — only Claude Code and ZCode expose a
 `UserPromptSubmit` hook, so other kits install the script without wiring it up.
@@ -169,6 +175,17 @@ bash agent-kit/kit-sync.sh              # mirror rules, skills, scripts, templat
 bash agent-kit/kit-scaffold.sh --check  # CI gate: fails if a generated file was edited
 bash agent-kit/kit-sync.sh --check      # CI gate: fails on drift or orphaned files
 ```
+
+To push kit updates into your projects, list them in `agent-kit/projects.list` (format in
+[`projects.list.example`](agent-kit/projects.list.example); the file stays out of git) and run:
+
+```bash
+bash agent-kit/sync-all.sh --dry-run    # preview: sentinel check + missing CLAUDE.md/AGENTS.md lines
+bash agent-kit/sync-all.sh              # run claude-sync.sh / agent-sync.sh for each project
+```
+
+A project whose `rules.md` has no sentinel is skipped until `scripts/repair-sentinel.sh` fixes it.
+The syncs never edit `CLAUDE.md` / `AGENTS.md`, so paste the missing lines the report prints.
 
 To add an agent: add a row to [`agent-kit/kits.manifest`](agent-kit/kits.manifest), run
 both scripts, and write the kit's README/BOOTSTRAP prose. No new sync wiring is needed.

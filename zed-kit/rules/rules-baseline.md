@@ -4,7 +4,7 @@
 
 After bootstrap, you (and the dev team) can edit this file freely to add project-specific rules. The skills (`/x-rules`, `/x-check`, `/x-implement`) read whatever is in `<project>/.claude/rules.md` — they don't care which rules came from the baseline vs the stack modules vs your additions.
 
-**Kit version:** agent-kit v1.2 (mirrored to claude-kit v1.3) · **Last updated:** 2026-09-29
+**Kit version:** agent-kit v1.2 (mirrored to claude-kit v1.3) · **Last updated:** 2026-10-04
 
 Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in one place: the kit repo's root `README.md`. Do not read a version from anywhere else.
 
@@ -205,6 +205,12 @@ Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in
 **Detect:** admin / privileged endpoints that mutate state without writing to an `audit_logs` table.
 **Fix:** middleware that auto-logs `{ admin_id, action, target_type, target_id, ip, user_agent, timestamp, before_state?, after_state? }` for every privileged write. Don't roll your own — use a library if one exists for your framework.
 
+### D-06 — Reuse the schema; one fact, one column
+**Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` and code review)
+**Why:** A delivery feature added `origin_latitude` / `origin_longitude` when the table's `latitude` / `longitude` already held the origin, then a backfill migration and a legacy request shape to keep both in step. The reviewer had to unwind all three. Every parallel column is a second source of truth that drifts, and every client has to learn which one is real.
+**Detect:** a migration adding a column whose meaning overlaps an existing one (same fact under another name, a copy of a related row's value, a value derivable from other columns); a data backfill or a "legacy shape" remapping for code that has not shipped; eager-loading a relation whose fields were already copied onto the row.
+**Fix:** before adding a column, read the model and its migrations and write one line in the plan: "no existing column holds X because ...". If one does, use it. Store a fact once; derive the rest at read time. Code that is not live yet changes in place: no backfill, no compat shim, no dual-write. A relation is loaded only when the response actually needs its fields.
+
 ---
 
 ## 4. Code quality rules
@@ -369,6 +375,18 @@ for f in sys.argv[1:]:
 **Fix:** state the behaviour or the threat in plain words: `(audit #9)` becomes "never a submitted merchant id, so one merchant can't redirect another's payout"; `(S-13)` becomes "so no system error text reaches the user". Drop a comment that says nothing once the id is gone. A spec *file* path is fine; its section tags are not. Traceability stays in the backlog and the audit files. Rule ids belong in reports and reviews, never in the code.
 **Enforced by:** `x-precommit.sh` blocks `E<n>-S<n>` and warns on audit finding numbers (pre-commit and CI); rule ids, spec tags and names are checked by `/x-implement` Phase 2 and `/x-check`.
 
+### Q-19 — Stay inside the story
+**Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` and code review)
+**Why:** A delivery PR also rewrote the account context, added a policy class, changed the stock scope, removed a working `company-id` header and added an API docs generator. None of it was asked for; the reviewer sent it all back ("DO NOT REMOVE THIS", "We don't need it now") and the delivery work waited on the reverts. Q-14 keeps the code you write simple; this rule keeps you from writing code nobody asked for.
+**Detect:** diff hunks that no usage scenario (W-07) needs: refactors of neighbouring code, removed or renamed working behaviour, new tooling (docs generators, linters, policies, context or service classes), new config knobs, docs or annotations the project keeps elsewhere.
+**Fix:** change only what the scenarios need. Leave working code as it is even when you would write it differently. When you spot a real problem outside the story (a security hole, a bug), report it in the summary and let the user decide; don't fix it in the same change.
+
+### Q-20 — Every API field has a named consumer
+**Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` and code review)
+**Why:** The backend returned `delivery_latitude`, `delivery_longitude` and `delivery_address_id` that the mobile app never read, and accepted request fields the app never sent. Each one had to be questioned in review ("What is the use of this?") and removed. Fields nobody reads still cost queries, payload and review time, and they freeze the contract.
+**Detect:** a response key (API Resource, serializer, DTO) or a request field (form request, schema) that no client file reads or sends; a backend contract change with no matching client change in the same story; a compat layer for an endpoint that has never shipped.
+**Fix:** before coding, write the contract table: each request and response field, its type, and the client file that sends or reads it (Dart model `fromJson`, screen, TS type). No consumer, no field. Backend and client change in the same story against that table. Unreleased endpoints change in place; released ones get an additive change plus a deprecation date, never a silent rename.
+
 ---
 
 ## 5. Workflow rules
@@ -489,6 +507,23 @@ multi-job wiring in `templates/ci/verified_tree.md`. Four things the gate must g
   5. **One marker per check set.** The marker asserts which checks a tree passed, so two gated
      workflows that run different checks need different marker names (`VERIFY_SALT`). Sharing one
      lets the first to finish excuse the rest: a rule scanner passing would skip the test suite.
+
+### W-07 — Write the usage story before the code
+**Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` Phase 0)
+**Why:** Over-built changes start from the code ("add delivery fields") instead of from the person using the app ("a guest pins a delivery spot and sees it on the order"). Writing the user's path first shows which fields, columns and screens are really needed, and it surfaces UX traps (a keyboard covering the Save button) before they ship.
+**Detect:** a plan or scope contract with no user story; scenarios written as code steps instead of what the user does and sees; fields, endpoints or columns in the diff that no scenario mentions.
+**Fix:** before editing, write:
+  - `As a <role>, I want <goal>, so that <benefit>.`
+  - 1 to 3 scenarios as `Given <state> / When <the user does X on screen Y> / Then <they see Z>`, including the error case and any keyboard or loading step.
+  - The fields, endpoints and columns the scenarios touch, each with the consumer that reads it (Q-20).
+
+Size it to the change: a one-line fix gets one `Given/When/Then` line. If a scenario needs something that does not exist, or is ambiguous, ask before coding.
+
+### W-08 — Turn reviewer pushback into a rule
+**Status:** ACTIVE (advisory)
+**Why:** The same review comments ("not needed", "remove this", "why is this here?") came back across PRs because each one was fixed in place and then forgotten. A comment that generalizes is a missing rule.
+**Detect:** a review comment that rejects a pattern rather than one line (scope creep, a redundant field, a legacy shim, a docs format), especially one already seen on an earlier PR.
+**Fix:** fix the code, then ask the user whether the comment should become a rule. If yes, add it with `/x-add-rule` and record the lesson in the project memory feedback file so the next session starts with it.
 
 ---
 

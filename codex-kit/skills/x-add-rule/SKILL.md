@@ -18,16 +18,18 @@ You are adding a new rule to `{{PROJECT_ROOT}}/{{RULES_PATH}}`. Use this when th
 
 ### 1. Parse the category
 
-Map the first token to a category:
-- `P` → Product / Scope rules (section 1)
-- `A` → Auth & Authorization rules (section 2)
-- `S` → Security rules (section 3)
-- `D` → Data & Privacy rules (section 4)
-- `Q` → Code quality rules (section 5)
-- `B` → Backend-specific rules (section 6)
-- `M` → Mobile-specific rules (section 7)
-- `W` → Admin dashboard-specific rules (section 8)
-- `X` → Audit-derived rules (section 9)
+Map the first token to the section of the same name in the rules file:
+- `A` → Auth & Authorization rules
+- `S` → Security rules
+- `D` → Data & Privacy rules
+- `Q` → Code quality rules
+- `W` → Workflow rules
+- `B` → Backend rules (the stack module section, e.g. `B-LV-`, `B-DJ-`)
+- `M` → Mobile rules (the stack module section, e.g. `M-FL-`, `M-RN-`)
+- `P` → Product / Scope rules (below the kit-managed marker)
+- `X` → Audit-derived rules (below the kit-managed marker)
+
+Match by heading text, not by section number; projects add their own sections.
 
 If the user provides a full word ("product", "security"), match it to the letter. If unclear, ask.
 

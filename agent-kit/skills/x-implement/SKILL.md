@@ -164,6 +164,17 @@ Format:
 ### Task summary
 <one paragraph: what the user asked for, in clear language>
 
+### Usage story (W-07)
+As a <role>, I want <goal>, so that <benefit>.
+- Given <state> / When <the user does X on screen Y> / Then <they see Z>
+- Given <error state> / When <...> / Then <the message or fallback they see>
+<Size to the change: a one-line fix keeps one Given/When/Then line. Every field, endpoint, column and screen in Phase 1 must trace back to a line here.>
+
+### Contract table (Q-20, D-06) — only when an API, request or schema is touched
+| Field | Direction | Type | Consumer (client file) | Column (existing or new + why no existing one fits) |
+|---|---|---|---|---|
+| <name> | request / response | <type> | <e.g. lib/models/order.dart fromJson> | <existing `latitude` / new: ...> |
+
 ### Parsed input
 - 📋 **Instructions**:
   - [Item 1]
@@ -187,6 +198,8 @@ Format:
 ALWAYS list these explicitly, so the user can see the skill is enforcing them:
 - Senior architect / full-stack / UI-UX / DBA / security baseline (Google/Apple-level judgment)
 - SOLID + DRY, no over-engineering, no premature abstraction
+- Story first (W-07), stay inside the story (Q-19): no refactors, removals or tooling the scenarios don't need
+- One fact, one column (D-06); every API field has a named consumer (Q-20)
 - Reuse before create (Q-11) — grep codebase first; new helpers go in shared locations
 - No over-comments (Q-12) — explain WHY not WHAT
 - ISO 27001 + OWASP Top 10 awareness
@@ -213,6 +226,7 @@ ALWAYS list these explicitly, so the user can see the skill is enforcing them:
 - [Adjacent files left alone]
 
 ### Acceptance criteria
+- [ ] Every usage-story scenario is shown working (test output, command result or screenshot), not asserted
 - [ ] [Specific testable criterion 1]
 - [ ] [Specific testable criterion 2]
 - [ ] Matching test file(s) exist for each new unit of behavior (W-02 + M-FL-12) — OR `--no-tests` was explicitly passed and justified
@@ -400,6 +414,12 @@ For each modified file:
 **Q-12 is mandatory on every file you wrote or edited.** For each new/modified non-trivial or exported function, method, or class, verify it has a concise doc comment (purpose + `@param`/`@returns` in the language's convention) and that line-level comments stay minimal (WHY, not WHAT). Never run only the Q-13 character scan and call the self-check done — Q-12 is a semantic check with no regex, so it must be walked deliberately, every time.
 
 **Q-17 and Q-18 are mandatory on every change.** Grep the diff for tracking ids (`git diff | grep -nE '^\+.*(E[0-9]{1,2}-S[0-9]{1,2}|[Aa]udit #?[A-Z]*[0-9]+|\((B-LV|M-FL|[A-Z])-[0-9]{2}\))'`) and rewrite any hit as the behaviour or threat it stands for; a backlog prompt naming its story is not a reason to repeat the id in code. Any commit message you draft uses a Conventional Commits subject with no story id.
+
+**W-07, Q-19, Q-20 and D-06 are mandatory on every change.** Walk the diff hunk by hunk against the usage story:
+1. Every hunk serves a scenario. A refactor, removal, rename or new class/tool that no scenario needs is reverted (Q-19), and the gap you meant to fix goes in the report instead.
+2. Every new migration column has its "no existing column holds this" line in the contract table, with no backfill or legacy shim for code that has not shipped (D-06).
+3. Every new request field and response key has a consumer in the contract table, and the client change is in the same story (Q-20). Remove any key whose consumer is blank.
+4. Flutter: every form field you added or touched passes M-FL-14 (tap outside closes the keyboard, Next/Done chain, submit button reachable).
 
 **Q-13 is mandatory on every file you wrote or edited.** Run this Python one-liner over the modified set as part of Step 2.3 (BSD `grep` on macOS can't do Unicode classes):
 

@@ -1,0 +1,3 @@
+# <kit> <project-path> [extra sync args]
+# kit: claude (claude-kit/claude-sync.sh) or agent (agent-kit/agent-sync.sh)
+claude /Users/snad/Projects/glivion/soldapp
