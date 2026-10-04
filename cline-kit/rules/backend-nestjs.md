@@ -48,6 +48,6 @@
 **Fix:** restructure to break the cycle — extract shared logic to a third module, or use events/queues for the cross-module call.
 
 ### B-NEST-09 — Responses map to a DTO; input is whitelisted
-**Status:** ACTIVE (BLOCKING; semantic, NestJS side of Q-20 and D-06)
+**Status:** ACTIVE (BLOCKING; semantic, NestJS side of Q-20 and D-07)
 **Detect:** a controller returning a raw ORM / Drizzle row or `select()` of every column; response DTO fields no client reads; `ValidationPipe` without `whitelist: true`; a touched endpoint with no e2e test of its response shape.
 **Fix:** select or map only the fields the client uses into a response DTO; `new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })`; assert the response shape in the e2e test.

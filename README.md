@@ -155,9 +155,9 @@ check gated so an unchanged code tree is not re-scanned at every promotion hop (
 
 Every change starts from a usage story: `/x-implement` writes how the user will use the change
 before any code, keeps the diff inside that story, and lists each API field with the client
-that reads it, reusing existing columns (rules W-07, Q-19, Q-20, D-06). Laravel and Flutter
+that reads it, reusing existing columns (rules W-07, Q-19, Q-20, D-07). Laravel and Flutter
 projects also get explicit API Resources (B-LV-12) and forms that never trap the keyboard
-(M-FL-14).
+(M-FL-15).
 
 Two things vary by agent: whether the skills become invokable commands (see the table above),
 and whether the plan-mode hook is auto-registered — only Claude Code and ZCode expose a

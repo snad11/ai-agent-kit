@@ -242,7 +242,7 @@ Code, comments, tests, workflows and repo docs never cite the delivery process: 
 
 ## 9. Story first, contract agreed, smallest diff
 
-Every change starts from how a real user will use it (rule W-07): `As a / I want / so that`, then one to three Given/When/Then lines covering the screen, the taps, the keyboard and the error the user sees. A one-line fix gets a one-line scenario. The diff contains only what those scenarios need (rule Q-19): working code outside the story stays as it is, even when you would write it differently, and gaps you notice go in the report, not the diff. Before touching an API or schema, write the contract table (rules Q-20, D-06): each field, the client file that reads or sends it, and the existing column that holds it. No consumer, no field; an existing column wins over a new one; code that has not shipped changes in place with no backfill or legacy shim. Backend and mobile change together against that table. When a reviewer rejects a pattern rather than a line, fix it and ask whether it should become a rule (rule W-08).
+Every change starts from how a real user will use it (rule W-07): `As a / I want / so that`, then one to three Given/When/Then lines covering the screen, the taps, the keyboard and the error the user sees. A one-line fix gets a one-line scenario. The diff contains only what those scenarios need (rule Q-19): working code outside the story stays as it is, even when you would write it differently, and gaps you notice go in the report, not the diff. Before touching an API or schema, write the contract table (rules Q-20, D-07): each field, the client file that reads or sends it, and the existing column that holds it. No consumer, no field; an existing column wins over a new one; code that has not shipped changes in place with no backfill or legacy shim. Backend and mobile change together against that table. When a reviewer rejects a pattern rather than a line, fix it and ask whether it should become a rule (rule W-08).
 
 ---
 
@@ -256,4 +256,4 @@ Every change starts from how a real user will use it (rule W-07): `As a / I want
 - Persist new rules/preferences IMMEDIATELY, not later
 - Never add AI attribution to commits, PRs or code (Q-15)
 - No tracking ids in code (Q-18); Conventional Commit subjects with no story id (Q-17)
-- Usage story before code (W-07); only what the story needs (Q-19); one fact, one column, every API field has a consumer (D-06, Q-20)
+- Usage story before code (W-07); only what the story needs (Q-19); one fact, one column, every API field has a consumer (D-07, Q-20)

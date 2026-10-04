@@ -205,7 +205,7 @@ Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in
 **Detect:** admin / privileged endpoints that mutate state without writing to an `audit_logs` table.
 **Fix:** middleware that auto-logs `{ admin_id, action, target_type, target_id, ip, user_agent, timestamp, before_state?, after_state? }` for every privileged write. Don't roll your own — use a library if one exists for your framework.
 
-### D-06 — Reuse the schema; one fact, one column
+### D-07 — Reuse the schema; one fact, one column
 **Status:** ACTIVE (BLOCKING; semantic, enforced by `/x-implement` and code review)
 **Why:** A feature added `origin_latitude` / `origin_longitude` while `latitude` / `longitude` already held the origin, then a backfill and a legacy shim to keep them in step. Parallel columns drift and every client must guess which one is real.
 **Detect:** a new column overlapping an existing one (same fact, a copy of a related row's value, or derivable); a backfill or legacy remapping for code that has not shipped; eager-loading a relation whose fields are already on the row.
@@ -514,7 +514,7 @@ multi-job wiring in `templates/ci/verified_tree.md`. Four things the gate must g
 **Detect:** no story in the plan; scenarios written as code steps; diff items no scenario mentions; a full plan, contract table or long report for a two-line fix.
 **Fix:** before editing, write `As a <role>, I want <goal>, so that <benefit>` and 1 to 3 `Given / When <user does X on screen Y> / Then <they see Z>` lines, including the error case. Ask if a scenario is ambiguous or needs something missing.
   - **Small change** (up to 2 files, no API or schema change): one Given/When/Then line, read only the touched files and their direct callers, report in 3 to 5 lines.
-  - **Feature, API or schema change**: full story plus the contract table (Q-20, D-06).
+  - **Feature, API or schema change**: full story plus the contract table (Q-20, D-07).
 
 ### W-08 — Turn reviewer pushback into a rule
 **Status:** ACTIVE (advisory)

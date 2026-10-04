@@ -65,6 +65,6 @@
 **Fix:** every migration has a working `down`. If a column drop is genuinely irreversible (e.g. data loss), document with `// IRREVERSIBLE: explanation` and require explicit acknowledgment in the PR.
 
 ### B-LV-12 — API Resources list their fields; persist only validated input
-**Status:** ACTIVE (BLOCKING; semantic, Laravel side of Q-20 and D-06)
+**Status:** ACTIVE (BLOCKING; semantic, Laravel side of Q-20 and D-07)
 **Detect:** `parent::toArray($request)` in a `JsonResource`; Resource keys no client reads; `->with('rel')` the Resource doesn't output; `$request->all()` / `input()` passed to `create` / `update` / `fill`; a touched endpoint with no JSON-shape test.
 **Fix:** list each key in `toArray`; use `whenLoaded()` / `when()` / `whenNotNull()` for optional data; persist `$request->validated()`; cover each touched endpoint with `assertJsonStructure`.

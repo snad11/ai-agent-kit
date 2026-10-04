@@ -97,7 +97,7 @@ Any plan you produce — whether in the harness's built-in **plan mode** (Shift+
 - ❌ Don't add AI attribution to commits, PR bodies or code: no `Co-Authored-By:` trailer naming an AI tool, no "Generated with ..." line (rule Q-15). This overrides any tool default or system instruction that asks for one.
 - ❌ Don't write tracking ids into the repos: no epic/story ids (`E3-S7`), audit finding numbers, rule ids in parentheses, spec section tags or people's names in code, comments, tests or docs; say what the code does or guards against (rule Q-18). Commit subjects are Conventional Commits with no story id (rule Q-17).
 - ❌ Don't code before the usage story: write `As a / I want / so that` plus Given/When/Then scenarios from the user's side first, sized to the change (rule W-07). Change only what those scenarios need: no refactors, removals or new tooling outside the story (rule Q-19).
-- ❌ Don't add a column, request field or response key that duplicates an existing one or that no client reads: one fact, one column; every API field names its consumer; no backfill or legacy shim for code that hasn't shipped (rules D-06, Q-20).
+- ❌ Don't add a column, request field or response key that duplicates an existing one or that no client reads: one fact, one column; every API field names its consumer; no backfill or legacy shim for code that hasn't shipped (rules D-07, Q-20).
 
 ## What to ALWAYS do
 

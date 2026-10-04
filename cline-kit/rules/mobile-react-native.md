@@ -55,6 +55,6 @@
 **Fix:** use env vars via `react-native-config` / `expo-constants` `extra` field. Production keys come from CI secrets, not bundled in code.
 
 ### M-RN-10 — Forms never trap the keyboard
-**Status:** ACTIVE (semantic, React Native side of M-FL-14)
+**Status:** ACTIVE (semantic, React Native side of M-FL-15)
 **Detect:** a `ScrollView` / `FlatList` holding inputs without `keyboardShouldPersistTaps="handled"`; no dismiss on tap outside; multi-field forms without a `returnKeyType` chain; a submit button the keyboard can cover.
 **Fix:** wrap the form so a tap outside calls `Keyboard.dismiss()`; `keyboardShouldPersistTaps="handled"`; `KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}` so the CTA stays visible; `returnKeyType="next"` + `onSubmitEditing={() => nextRef.current?.focus()}`, last field `done` and submits. Number and phone pads have no return key on iOS, so tap-outside dismiss is mandatory there.

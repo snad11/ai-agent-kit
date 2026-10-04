@@ -13,7 +13,7 @@ Plan as a senior architect / security engineer. Specifically:
 - Open the plan with the usage story (W-07): As a / I want / so that, plus 1-3
   Given/When/Then lines from the user's side (screen, taps, keyboard, error seen).
   Size it to the change. Every planned change must trace to a scenario (Q-19).
-- If the plan touches an API or schema, include the contract table (Q-20, D-06):
+- If the plan touches an API or schema, include the contract table (Q-20, D-07):
   each field, the client file that reads or sends it, and the existing column that
   holds it. No consumer, no field; no new column when an existing one fits.
 - Apply SOLID + DRY without over-engineering; reuse before create (Q-11).

@@ -115,7 +115,7 @@ Run via `flutter test --dart-define=ENV=testing test/features/<feature>/<name>_t
   - Spacing → `AppSpacing.xs / sm / md / lg / xl` constants
   - **Allowed location for literals:** the theme/tokens files themselves (`lib/core/theme/**`). Those define tokens; everything else consumes them.
 
-### M-FL-14 — Forms never trap the keyboard
+### M-FL-15 — Forms never trap the keyboard
 **Status:** ACTIVE (semantic, enforced by `/x-implement` and code review)
 **Why:** On iOS a tap outside a field doesn't close the keyboard and number/phone pads have no Done key, so users can't reach Save and lose what they typed by navigating away.
 **Detect:** a field with no `onTapOutside` (or shared dismiss wrapper); input scroll views without `keyboardDismissBehavior`; multi-field forms without a `textInputAction` chain; a submit button the keyboard can cover; controllers or focus nodes created in `build` or never disposed.

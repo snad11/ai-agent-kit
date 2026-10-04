@@ -66,5 +66,5 @@ bash .cursor/scripts/install-workflows.sh all
   and the memory folder.
 - Reads AGENTS.md natively; .mdc adds per-glob scoping. Legacy .cursorrules is ignored by Agent mode
 - **Keep tracking ids out of the repos (Q-18, Q-17).** Nothing the bootstrap writes, and nothing written in the project afterwards, cites an epic/story id, an audit finding number, a rule id in parentheses, a spec section tag or a person's name: comments say what the code does or guards against. Commit subjects are Conventional Commits with no story id. The installed `pre-commit` and `commit-msg` hooks and CI enforce both.
-- **Start every change from a usage story (W-07, Q-19, Q-20, D-06).** The agent writes how the user will use the change before coding, changes only what that story needs, and lists each API field with the client that reads it, reusing existing columns. `/x-implement` Phase 0 and Phase 2 enforce this; reviewers check it.
+- **Start every change from a usage story (W-07, Q-19, Q-20, D-07).** The agent writes how the user will use the change before coding, changes only what that story needs, and lists each API field with the client that reads it, reusing existing columns. `/x-implement` Phase 0 and Phase 2 enforce this; reviewers check it.
 
