@@ -91,6 +91,9 @@ ${RED}🔴 BLOCKING (commit refused):${NC}
   Q-08  Drizzle .where() using JS && instead of and()
   Q-13  AI hidden characters (em-dash, en-dash, ellipsis, smart quotes, zero-width, BOM)
   Q-13  Decorative HTML entities (&mdash;, &ndash;, &hellip;)
+  Q-15  AI attribution in commit messages (commit-msg hook, --ci-messages)
+  Q-17  Commit subject not Conventional Commits, or an epic/story id in the message
+  Q-18  Epic/story id (E<n>-S<n>) in code, comments or repo docs
   X-02  Asset ownership bypass (OR createdBy IS NULL)
 
 ${YELLOW}🟡 WARNINGS (don't block, just flag):${NC}
@@ -99,6 +102,7 @@ ${YELLOW}🟡 WARNINGS (don't block, just flag):${NC}
   Q-03  console.log / print() in committed code
   Q-07  FormData.fromMap (verify no un-awaited Futures)
   S-13  Raw error.message / toString() leaked to user (Node, Flutter, React)
+  Q-18  Audit finding number (audit #N) in code, comments or repo docs
 
 For full rule details: .claude/rules.md
 EOF
@@ -198,11 +202,46 @@ report_q15() {
     printf "   ${BOLD}Fix:${NC} remove the AI co-author trailer / \"Generated with\" line. See Q-15.\n\n"
 }
 
+# Q-17: Conventional Commits subject, no epic/story id anywhere in the message.
+Q17_SUBJECT='^(feat|fix|chore|ci|docs|refactor|perf|test|build|style|revert)(\([a-z0-9-]+\))?!?: .+'
+# Subjects git writes itself are left alone.
+Q17_EXEMPT='^(Merge |Revert "|fixup! |squash! |amend! )'
+Q17_STORY_ID='(^|[^A-Za-z0-9])E[0-9]{1,2}-S[0-9]{1,2}[a-z]?([^0-9]|$)'
+
+# Print what breaks Q-17 in the commit message on stdin: the subject if it isn't conventional,
+# and every line naming a story.
+q17_hits() {
+    local message subject
+    message=$(grep -v '^#' || true)
+    subject=$(printf "%s\n" "$message" | grep -m1 -v '^[[:space:]]*$' || true)
+    if [ -n "$subject" ] && ! printf "%s\n" "$subject" | grep -qE "$Q17_EXEMPT" \
+        && ! printf "%s\n" "$subject" | grep -qE "$Q17_SUBJECT"; then
+        printf "subject: %s\n" "$subject"
+    fi
+    printf "%s\n" "$message" | grep -nE "$Q17_STORY_ID" | sed 's/^/story id on line /' || true
+}
+
+report_q17() {
+    printf "${RED}${BOLD}🔴 Q-17 Commit message format${NC} (%s)\n" "$1"
+    printf "%s\n" "$2" | sed 's/^/   /'
+    printf "   ${BOLD}Fix:${NC} write the subject as type(scope): summary and drop the story id; the backlog keeps the mapping. See Q-17.\n\n"
+}
+
 # Installed as .git/hooks/commit-msg by install-hooks.sh; git passes the message file as $1.
 if [ "$(basename "$0")" = "commit-msg" ]; then
-    hits=$(q15_hits < "${1:?commit-msg hook needs the message file}")
+    message_file="${1:?commit-msg hook needs the message file}"
+    blocked=0
+    hits=$(q15_hits < "$message_file")
     if [ -n "$hits" ]; then
         report_q15 "this commit" "$hits"
+        blocked=1
+    fi
+    hits=$(q17_hits < "$message_file")
+    if [ -n "$hits" ]; then
+        report_q17 "this commit" "$hits"
+        blocked=1
+    fi
+    if [ "$blocked" -eq 1 ]; then
         printf "${RED}${BOLD}❌ x-precommit: commit message BLOCKED${NC}\n"
         exit 1
     fi
@@ -243,8 +282,13 @@ case "${1:-}" in
                 report_q15 "$(git rev-parse --short "$sha")" "$hits"
                 failed=1
             fi
+            hits=$(git log -1 --format=%B "$sha" | q17_hits)
+            if [ -n "$hits" ]; then
+                report_q17 "$(git rev-parse --short "$sha")" "$hits"
+                failed=1
+            fi
         done
-        [ "$failed" -eq 0 ] && printf "${GREEN}${BOLD}✅ x-precommit: no AI attribution in commit messages${NC}\n"
+        [ "$failed" -eq 0 ] && printf "${GREEN}${BOLD}✅ x-precommit: commit messages are clean (no AI attribution, conventional subjects, no story ids)${NC}\n"
         exit "$failed"
         ;;
     --test)
@@ -527,6 +571,18 @@ scan_pattern "CRITICAL" "Q-13" "Decorative HTML entity (&mdash;/&ndash;/&hellip;
     '&(mdash|ndash|hellip);' \
     '\.(ts|tsx|js|jsx|dart|kt|swift|py|php|graphql|html|svelte|vue|astro)$' \
     "Replace with plain ASCII. &mdash; -> period/comma/semicolon; &hellip; -> three ASCII dots or restructure. See Q-13."
+
+# Q-18: backlog and audit tracking ids in code, comments and repo docs. Shell scripts are left
+# out so this scanner, which names its own rules, never flags itself.
+Q18_FILES='\.(ts|tsx|js|jsx|dart|kt|swift|py|php|go|rb|java|cs|html|css|scss|vue|svelte|astro|md|ya?ml|toml|xml)$'
+scan_pattern "CRITICAL" "Q-18" "Epic/story id in code" \
+    "$Q17_STORY_ID" \
+    "$Q18_FILES" \
+    "Say what the code does or guards against instead of naming the backlog story. See Q-18."
+scan_pattern "WARNING" "Q-18" "Audit finding number in code" \
+    '[Aa]udit (Critical |High |Medium |Low )?#[0-9]+|\(audit [A-Z]*[0-9]+' \
+    "$Q18_FILES" \
+    "Describe the threat in plain words instead of citing the audit finding. See Q-18."
 
 # ============================================================
 # S-02: Committed .env files (special-case: filename check, not content)

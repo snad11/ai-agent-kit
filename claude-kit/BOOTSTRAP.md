@@ -228,6 +228,7 @@ Audit highlights:
 - **DO run the audits in the background** in Phase 3 and continue with Phases 4-6 in parallel. Don't block the whole bootstrap waiting on a 20-minute audit.
 - **DO use the kit's templates** — don't reinvent the rules file or the CLAUDE.md format from scratch. The templates in `claude-kit/templates/` and `claude-kit/rules/` are the source of truth.
 - **DO save user answers to memory immediately** as you collect them in Phase 2 — don't wait until Phase 5.
+- **Keep tracking ids out of the repos (Q-18, Q-17).** Nothing the bootstrap writes, and nothing written in the project afterwards, cites an epic/story id, an audit finding number, a rule id in parentheses, a spec section tag or a person's name: comments say what the code does or guards against. Commit subjects are Conventional Commits with no story id. The installed `pre-commit` and `commit-msg` hooks and CI enforce both.
 
 ---
 

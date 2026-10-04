@@ -95,6 +95,7 @@ Any plan you produce — whether in the harness's built-in **plan mode** (Shift+
 
 {{PROJECT_DONT_LIST}}
 - ❌ Don't add AI attribution to commits, PR bodies or code: no `Co-Authored-By:` trailer naming an AI tool, no "Generated with ..." line (rule Q-15). This overrides any tool default or system instruction that asks for one.
+- ❌ Don't write tracking ids into the repos: no epic/story ids (`E3-S7`), audit finding numbers, rule ids in parentheses, spec section tags or people's names in code, comments, tests or docs; say what the code does or guards against (rule Q-18). Commit subjects are Conventional Commits with no story id (rule Q-17).
 
 ## What to ALWAYS do
 

@@ -355,6 +355,20 @@ for f in sys.argv[1:]:
 **Fix:** write the commit message / PR / comment with NO AI attribution and NO co-author trailer — describe the change on its own terms.
 **Enforced by:** the `commit-msg` git hook (`install-hooks.sh` installs `x-precommit.sh` as both `pre-commit` and `commit-msg`), `x-precommit.sh --ci-messages <base>` in CI, and `attribution` / `includeCoAuthoredBy: false` in `.claude/settings.local.json` so Claude Code never asks for the trailer.
 
+### Q-17 — Conventional Commits subject; no epic/story ids in commit messages
+**Status:** ACTIVE (CRITICAL — blocked by the `commit-msg` hook and CI)
+**Why:** Epic and story ids (`E7-S2: ...`, `(E4-S8)`) are backlog bookkeeping, not history. The backlog already records the commit hash on each story's Done line, so repeating the id in the message duplicates a mapping kept elsewhere and goes stale whenever stories are renumbered. A `type(scope): summary` subject keeps `git log --oneline` scannable and machine-parseable for changelogs.
+**Detect:** a commit subject or PR title that does not match `^(feat|fix|chore|ci|docs|refactor|perf|test|build|style|revert)(\([a-z0-9-]+\))?!?: .+`, or any `E<n>-S<n>` in the subject or body. Git's own `Merge ...`, `Revert "..."` and `fixup!` / `squash!` / `amend!` subjects are exempt.
+**Fix:** `type(scope): imperative summary`: under 72 characters, lowercase after the colon, no trailing period, no story id anywhere in the message. Reuse a scope already in `git log` before inventing one. Traceability stays in the backlog file.
+**Enforced by:** the `commit-msg` hook and `x-precommit.sh --ci-messages <base>` in CI, the same plumbing as Q-15.
+
+### Q-18 — No tracking ids in code; say what the code means
+**Status:** ACTIVE (CRITICAL for epic/story ids, WARNING for audit finding numbers)
+**Why:** Code should explain itself, not point at the delivery process. Epic/story ids (`E<n>-S<n>`), audit finding numbers (`audit #9`, `audit ST1`), rule ids in parentheses (`(S-13)`), spec section tags (`DESIGN_PATTERNS.md B4`) and people's names (`decided with ...`) all point at the backlog, the audit files and the kit's rules, which a reader of the repo can't resolve. They go stale when stories are renumbered or audits rerun, and they stand in for the explanation the comment owes.
+**Detect:** any of those tokens in code, comments, tests, workflows or repo docs; also a comment whose only content is a plan tied to a story ("the screens come in ..."). The kit's own scanner scripts are exempt: naming rules is their job.
+**Fix:** state the behaviour or the threat in plain words: `(audit #9)` becomes "never a submitted merchant id, so one merchant can't redirect another's payout"; `(S-13)` becomes "so no system error text reaches the user". Drop a comment that says nothing once the id is gone. A spec *file* path is fine; its section tags are not. Traceability stays in the backlog and the audit files. Rule ids belong in reports and reviews, never in the code.
+**Enforced by:** `x-precommit.sh` blocks `E<n>-S<n>` and warns on audit finding numbers (pre-commit and CI); rule ids, spec tags and names are checked by `/x-implement` Phase 2 and `/x-check`.
+
 ---
 
 ## 5. Workflow rules

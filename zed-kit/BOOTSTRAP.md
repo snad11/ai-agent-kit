@@ -65,3 +65,5 @@ bash .zed/scripts/install-workflows.sh all
 - **Do not modify source code.** Only `.zed/`, `.rules`, `audits/`
   and the memory folder.
 - .rules outranks AGENTS.md in Zed's priority list, so this kit writes both and keeps them consistent
+- **Keep tracking ids out of the repos (Q-18, Q-17).** Nothing the bootstrap writes, and nothing written in the project afterwards, cites an epic/story id, an audit finding number, a rule id in parentheses, a spec section tag or a person's name: comments say what the code does or guards against. Commit subjects are Conventional Commits with no story id. The installed `pre-commit` and `commit-msg` hooks and CI enforce both.
+

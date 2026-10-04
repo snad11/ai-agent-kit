@@ -399,6 +399,8 @@ For each modified file:
 
 **Q-12 is mandatory on every file you wrote or edited.** For each new/modified non-trivial or exported function, method, or class, verify it has a concise doc comment (purpose + `@param`/`@returns` in the language's convention) and that line-level comments stay minimal (WHY, not WHAT). Never run only the Q-13 character scan and call the self-check done — Q-12 is a semantic check with no regex, so it must be walked deliberately, every time.
 
+**Q-17 and Q-18 are mandatory on every change.** Grep the diff for tracking ids (`git diff | grep -nE '^\+.*(E[0-9]{1,2}-S[0-9]{1,2}|[Aa]udit #?[A-Z]*[0-9]+|\((B-LV|M-FL|[A-Z])-[0-9]{2}\))'`) and rewrite any hit as the behaviour or threat it stands for; a backlog prompt naming its story is not a reason to repeat the id in code. Any commit message you draft uses a Conventional Commits subject with no story id.
+
 **Q-13 is mandatory on every file you wrote or edited.** Run this Python one-liner over the modified set as part of Step 2.3 (BSD `grep` on macOS can't do Unicode classes):
 
 ```bash

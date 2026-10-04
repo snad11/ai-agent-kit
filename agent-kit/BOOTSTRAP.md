@@ -138,6 +138,7 @@ Every item is observable. The bootstrap isn't done until each is true. Verify, d
 - **Do save user answers to memory immediately** as collected in Phase 2.
 - **Do not overwrite an existing `rules.md` that has no sentinel.** Its project rules live above the line the sync preserves, so a rebuild discards them. Run `scripts/repair-sentinel.sh <project>` first, read the report, then sync.
 - **Do not delete the in-project `rules.md.bak-<ts>`** a repair or sync writes. For a project without git it is the only rollback.
+- **Keep tracking ids out of the repos (Q-18, Q-17).** Nothing the bootstrap writes, and nothing written in the project afterwards, cites an epic/story id, an audit finding number, a rule id in parentheses, a spec section tag or a person's name: comments say what the code does or guards against. Commit subjects are Conventional Commits with no story id. The installed `pre-commit` and `commit-msg` hooks and CI enforce both.
 
 ---
 

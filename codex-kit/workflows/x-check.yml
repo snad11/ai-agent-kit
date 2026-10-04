@@ -46,7 +46,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # W-06: an identical code tree is scanned once, not again at every promotion hop.
+      # An identical code tree is scanned once, not again at every promotion hop.
       # Note the scan is diff-scoped, so the marker records "this tree was scanned against
       # some base", not against this particular base. See templates/ci/verified_tree.md.
       - name: Already verified?

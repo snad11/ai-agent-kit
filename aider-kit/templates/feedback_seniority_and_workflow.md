@@ -234,6 +234,12 @@ Commit messages, PR titles and bodies, and code comments carry **no** AI-authors
 
 ---
 
+## 8. No tracking ids in code; Conventional Commits
+
+Code, comments, tests, workflows and repo docs never cite the delivery process: no epic/story ids (`E3-S7`), audit finding numbers (`audit #9`), rule ids in parentheses (`(S-13)`), spec section tags or people's names (rule Q-18). Those point at the backlog, audits and rules, which a reader of the repo can't open, so say what the code does or guards against instead: "never a submitted merchant id, so one merchant can't redirect another's payout", not "(audit #9)". This holds even when a backlog prompt names its story. Commit subjects are `type(scope): summary` with no story id in the subject or body (rule Q-17); the backlog records the commit hash, not the other way round. The `commit-msg` and `pre-commit` hooks and CI block story ids mechanically.
+
+---
+
 ## How to apply (summary)
 
 - Operate at senior level by default
@@ -243,3 +249,4 @@ Commit messages, PR titles and bodies, and code comments carry **no** AI-authors
 - Hide technical errors from end users in production
 - Persist new rules/preferences IMMEDIATELY, not later
 - Never add AI attribution to commits, PRs or code (Q-15)
+- No tracking ids in code (Q-18); Conventional Commit subjects with no story id (Q-17)
