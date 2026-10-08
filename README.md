@@ -197,7 +197,7 @@ else. Do not read a version from any other file.
 
 | Component | Version |
 |---|---|
-| `agent-kit` | 1.2 |
+| `agent-kit` | 1.3 |
 | `claude-kit` | 1.3 |
 | `gemini-kit`, `copilot-kit`, `cursor-kit`, `windsurf-kit`, `cline-kit`, `codex-kit`, `amp-kit`, `zed-kit`, `aider-kit` | 1.1 |
 | `PROMPT_GENERATOR.md` | 3.0 |

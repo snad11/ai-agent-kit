@@ -7,7 +7,7 @@ allowed-tools: [Read, Edit, Write, Glob, Grep, Bash]
 
 # /x-implement — The {{PROJECT_NAME}} canonical work command
 
-<!-- kit: agent-kit v1.2 · PROMPT_GENERATOR v3.0 -->
+<!-- kit: agent-kit v1.3 · PROMPT_GENERATOR v3.0 -->
 
 You are doing work in the {{PROJECT_NAME}} project. This is the **single canonical entry point** for any non-trivial coding task. It runs in **3 phases**:
 
@@ -59,7 +59,7 @@ Parse `$ARGUMENTS` for:
 
 This is the planning phase. Goal: convert a messy task description into a locked scope contract that Phase 1 must stay inside.
 
-**Small-change path (automatic, W-07).** If the change touches at most 2 files and no API, request shape or schema: skip Steps 0.3 to 0.6 and the contract table; write the one-line usage story (`Given / When / Then`), read only the touched files and their direct callers, implement, run Phase 2 on those files only, and report in 3 to 5 lines. Anything larger, or any API or schema change, takes the full Phase 0.
+**Small-change path (automatic, W-07).** If the change touches at most 2 files and no API, request shape or schema: skip Steps 0.3 to 0.6 and the contract table; write the one-line usage story (`Given / When / Then`), read only the touched files and their direct callers, implement, run Phase 2 on those files only, and report in 3 to 5 lines that still end with How to test it (1 to 3 steps, see Step 2.6.1). Anything larger, or any API or schema change, takes the full Phase 0.
 
 ### Step 0.1 — Read the foundation files
 
@@ -497,11 +497,39 @@ Output:
 - [x] <criterion from contract>
 - [ ] <criterion from contract — not met because Y>
 
-### Next steps
-- [ ] Review the auto-fixes: `git diff <repo>/<file>`
-- [ ] Run the smoke test command
-- [ ] Commit when ready
+### How to test it
+Run: `<start command>` · Log in as <user state>
+1. Open <URL / screen / endpoint>
+2. Click "<exact label>" → you should see <result>
+3. ...
+Check: <where to confirm the data, e.g. network tab POST /api/x has field y>
+Failure case: <action> → "<exact message>"
 ```
+
+How to test it is always the LAST section of the reply, so the user can act on it the moment they finish reading.
+
+### Step 2.6.1 — Write the test walkthrough
+
+Rule W-09. The user tests every change by hand right after the run. Write the steps so they can do it without asking where to go or what to click.
+
+- **Short and plain**: under 15 lines. No "verify the feature works": each step names an exact place and an exact action.
+- **Run**: the command that starts what changed (e.g. `cd <repo> && yarn dev`, `php artisan serve`, `flutter run`), plus the login or account state the test needs (e.g. "a verified user").
+- **Entry point**: the full local URL (`http://localhost:3000/wallet`), the mobile screen path (Home → Wallet), or the endpoint (`POST /api/v1/...`).
+- **Steps**: numbered. One action per step with the exact on-screen label in quotes, then `→` what should appear. Read the labels from the code you changed; never guess them.
+- **Check**: where to confirm the data landed (DevTools network request and its body, an API GET, the list that should now show the row).
+- **Failure case**: one way to trigger the main error path and the exact message the user should see.
+
+By stack:
+
+| Stack | Steps look like |
+|---|---|
+| Web (Next.js, Nuxt, React, Vue) | URL + clicks + one DevTools network check |
+| Backend / API (Laravel, NestJS, Django, FastAPI) | Request blocks ready for Postman or curl: method, path, headers that matter, body, expected status and the key response fields. Include the error request too |
+| Mobile (Flutter, React Native) | Device or emulator, screen path, taps, and platform differences only when they matter |
+
+- Several changes in one run → one short block per change, most important first.
+- Something can't be tested by hand yet (blocked API, UI-only screen) → say so in one line instead of inventing steps.
+- **Backlog stories**: when the work is a story in `specs/backlogs/`, also write the same steps under that story, above its `**QA checklist**`, headed `**How to test**`. Replace an older block if one is there.
 
 ### Step 2.7 — Required outcomes (verify before you hand back)
 
@@ -518,6 +546,8 @@ Every item is observable. The run isn't finished until each is true, or the repo
 - [ ] Q-12 scan ran: no new inline comment paraphrases the line beneath it
 - [ ] Q-13 scan ran: the report carries the hit count, and it is 0
 - [ ] Frontend changes name the LCP element and confirm it paints without an entrance animation
+- [ ] The reply ends with How to test it: a start command, an entry point (URL / screen / endpoint), numbered actions using the exact on-screen labels, an expected result for each, and one failure case
+- [ ] For a backlog story, the same steps are written under the story above its QA checklist
 - [ ] Nothing outside the scope contract was modified
 
 ### Step 2.8 — Troubleshooting: symptom to root cause
@@ -535,6 +565,7 @@ When a run goes wrong, find the symptom here rather than re-deriving the cause.
 | Project rules vanished after a kit sync | `rules.md` had no sentinel, so the sync rebuilt it from the kit | Run `repair-sentinel.sh <project>` before syncing. Keep the in-project `.bak-<ts>` |
 | The plan-mode hook didn't fire | The hook isn't registered for this target in the agent's settings | Re-run `install-plan-hook.sh <project> <target>` |
 | The report says done, but the feature doesn't work | Completion was inferred from edits, not verified | Run it. Report actual output, failures included |
+| The user asks where to test, or what to click | Step 2.6.1 was skipped or its steps were vague | Rewrite How to test it with the URL or endpoint, exact labels and an expected result per step |
 | A user saw raw SQL or a stack trace | A new error path shipped without env gating (S-13) | Gate the detail on the environment; plain message in production |
 
 ---

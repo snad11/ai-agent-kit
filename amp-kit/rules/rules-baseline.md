@@ -4,7 +4,7 @@
 
 After bootstrap, you (and the dev team) can edit this file freely to add project-specific rules. The skills (`/x-rules`, `/x-check`, `/x-implement`) read whatever is in `<project>/.claude/rules.md` — they don't care which rules came from the baseline vs the stack modules vs your additions.
 
-**Kit version:** agent-kit v1.2 (mirrored to claude-kit v1.3) · **Last updated:** 2026-10-04
+**Kit version:** agent-kit v1.3 (mirrored to claude-kit v1.3) · **Last updated:** 2026-10-08
 
 Version numbers for the kit, the skills, and `PROMPT_GENERATOR.md` are pinned in one place: the kit repo's root `README.md`. Do not read a version from anywhere else.
 
@@ -521,6 +521,12 @@ multi-job wiring in `templates/ci/verified_tree.md`. Four things the gate must g
 **Why:** The same review comments ("not needed", "remove this") recurred across PRs because each was fixed and forgotten.
 **Detect:** a review comment rejecting a pattern rather than a line, especially one seen before.
 **Fix:** fix the code, then ask whether it should become a rule; if yes, add it with `/x-add-rule` and note it in the project memory feedback file.
+
+### W-09 — End every change with a test walkthrough
+**Status:** ACTIVE
+**Why:** Reports ended with "test it on the dev API" or "run the smoke test", so the user had to work out which page to open and what to click before they could check anything, and couldn't point at the step that failed.
+**Detect:** a finished feature, fix or cleanup whose reply has no "How to test it" section, or one without a start command, an entry point (URL, screen or endpoint), the exact on-screen labels, or an expected result per step.
+**Fix:** end the reply with a short "How to test it" (the x-implement Step 2.6.1 format): how to start it, where to go, numbered actions with exact labels and what should appear, where to check the data, and one failure case. Web gets URL + clicks, backend gets Postman or curl request blocks, mobile gets screens + taps. For a backlog story, write the same steps under the story above its QA checklist.
 
 ---
 

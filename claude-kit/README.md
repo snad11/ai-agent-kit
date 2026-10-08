@@ -83,7 +83,7 @@ This does the mechanical file copies instantly. Then open Claude Code in the pro
 - Security (S-01 through S-13)
 - Data & Privacy (D-01 through D-05)
 - Code Quality (Q-01 through Q-12)
-- Workflow (W-01 through W-03)
+- Workflow (W-01 through W-09)
 
 ---
 
